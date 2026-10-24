@@ -1,0 +1,118 @@
+{
+  "info": {
+    "_postman_id": "ipo-gestion-apis-v1",
+    "name": "IPO Gestión - Colección de APIs Académicas",
+    "description": "Colección de pruebas para las 3 APIs RESTful solicitadas: Login y CRUD de Usuarios.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Autenticación - Login (API 1)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"telefono\": \"+573151234567\",\n  \"codigo\": \"748291\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "auth", "login"]
+        },
+        "description": "API 1: Valida la identidad del pastor/usuario y entrega el Token de acceso JWT."
+      }
+    },
+    {
+      "name": "2. CRUD - Listar Directorio (API 2)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/usuarios",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "usuarios"]
+        },
+        "description": "API 2: Consulta el listado general de miembros y sus sedes asignadas."
+      }
+    },
+    {
+      "name": "3. CRUD - Inscribir Nuevo Usuario (API 2)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombreCompleto\": \"Pastor Daniel Estudiante\",\n  \"telefono\": \"+573105559988\",\n  \"rol\": \"Pastor\",\n  \"notas\": \"Inscripción de prueba académica\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/usuarios",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "usuarios"]
+        },
+        "description": "API 2: Registra a un nuevo usuario en la gobernanza institucional."
+      }
+    },
+    {
+      "name": "4. CRUD - Consultar Perfil por ID (API 3)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/usuarios/e4f5a6b7-8901-2345-6789-abcdef012345",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "usuarios", "e4f5a6b7-8901-2345-6789-abcdef012345"]
+        },
+        "description": "API 3: Obtiene el detalle individual del perfil del usuario (Pantalla 15)."
+      }
+    },
+    {
+      "name": "5. CRUD - Actualizar Perfil o Rol (API 3)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rol\": \"Presbitero\",\n  \"activo\": true\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/usuarios/e4f5a6b7-8901-2345-6789-abcdef012345",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "usuarios", "e4f5a6b7-8901-2345-6789-abcdef012345"]
+        },
+        "description": "API 3: Actualiza datos del perfil o modifica su estado."
+      }
+    },
+    {
+      "name": "6. CRUD - Eliminar o Suspender Usuario (API 3)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/usuarios/e4f5a6b7-8901-2345-6789-abcdef012345",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "usuarios", "e4f5a6b7-8901-2345-6789-abcdef012345"]
+        },
+        "description": "API 3: Elimina o desvincula al usuario del sistema."
+      }
+    }
+  ]
+}

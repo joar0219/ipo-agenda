@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+/* Ajustes visuales para react-big-calendar (IPO Gestión) */
+.rbc-btn-group button {
+  color: #475569 !important; 
+  border-color: #e2e8f0 !important; 
+}
+.rbc-btn-group button.rbc-active {
+  background-color: #eff6ff !important; 
+  color: #2563eb !important; 
+  box-shadow: none !important;
+}
+.rbc-toolbar button:active, .rbc-toolbar button:hover, .rbc-toolbar button:focus {
+  background-color: #f8fafc !important; 
+}
+.rbc-today {
+  background-color: #f0fdf4 !important; 
+}
