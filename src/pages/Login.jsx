@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Lock, ShieldCheck, ArrowRight, Loader2, CheckCircle2, UserCheck, Sparkles, AlertCircle, Scale, Building2, PhoneCall } from 'lucide-react';
+import { Lock, ShieldCheck, ArrowRight, Loader2, CheckCircle2, UserCheck, Sparkles, AlertCircle, Scale, Building2, PhoneCall, Church } from 'lucide-react';
 import { supabase } from '../SupabaseClient';
 import { useAuth } from '../context/AuthContext';
 
@@ -157,11 +157,20 @@ export default function Login({ onLoginSuccess }) {
         <div className="p-7">
           {paso === 1 ? (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="text-center mb-5">
+              <div className="text-center mb-4">
                 <h2 className="text-lg font-bold text-slate-800">Acceso Ministerial Seguro</h2>
                 <p className="text-slate-500 text-xs mt-1">
                   Ingresa tu número de WhatsApp registrado previamente por la oficina central.
                 </p>
+              </div>
+
+              {/* BANNER INFORMATIVO PARA NANCY GARCÍA Y EVALUACIÓN */}
+              <div className="mb-4 p-3.5 bg-blue-50/80 border border-blue-200/90 rounded-2xl text-xs text-blue-900 flex items-start gap-2.5 shadow-xs">
+                <Sparkles size={16} className="text-blue-600 shrink-0 mt-0.5" />
+                <div className="leading-relaxed">
+                  <strong className="block text-blue-950 font-bold mb-0.5">Fase Piloto Zonal (Sur-Occidente)</strong>
+                  Entorno habilitado para evaluación de la administración. Digita tu número o usa los botones de acceso rápido abajo. El código institucional temporal es <strong>123456</strong>.
+                </div>
               </div>
 
               {mensajeError && (
@@ -234,7 +243,7 @@ export default function Login({ onLoginSuccess }) {
                 <button
                   type="button"
                   onClick={() => entrarDirecto('perfil-elizabeth-nieto')}
-                  className="w-full py-2 px-3 bg-purple-50 hover:bg-purple-100 text-purple-900 rounded-xl text-xs font-bold transition-all border border-purple-200 flex items-center justify-between"
+                  className="w-full py-2 px-3 bg-purple-50 hover:bg-purple-100 text-purple-900 rounded-xl text-xs font-bold transition-all border border-purple-200 flex items-center justify-between cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <Scale size={15} className="text-purple-700" />
@@ -245,11 +254,26 @@ export default function Login({ onLoginSuccess }) {
                   </span>
                 </button>
 
-                {/* 3. ROL PASTORAL LOCAL */}
+                {/* 3. ROL PRESBITERIO ZONAL */}
+                <button
+                  type="button"
+                  onClick={() => entrarDirecto('perfil-gabriel-gonzalez')}
+                  className="w-full py-2 px-3 bg-blue-50 hover:bg-blue-100 text-blue-900 rounded-xl text-xs font-bold transition-all border border-blue-200 flex items-center justify-between cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Church size={15} className="text-blue-700" />
+                    Gabriel González
+                  </span>
+                  <span className="text-[10px] bg-blue-200/80 px-2 py-0.5 rounded-full font-semibold">
+                    Presbítero Principal
+                  </span>
+                </button>
+
+                {/* 4. ROL PASTORAL LOCAL */}
                 <button
                   type="button"
                   onClick={() => entrarDirecto('perfil-jose-arcila')}
-                  className="w-full py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 rounded-xl text-xs font-bold transition-all border border-emerald-200 flex items-center justify-between"
+                  className="w-full py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 rounded-xl text-xs font-bold transition-all border border-emerald-200 flex items-center justify-between cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <UserCheck size={15} className="text-emerald-700" />

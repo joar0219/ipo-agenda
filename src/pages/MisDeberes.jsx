@@ -224,6 +224,20 @@ export default function MisDeberes() {
               archivo_url: publicUrl,
               fecha_entrega: new Date().toISOString()
             }, { onConflict: 'deber_id,usuario_id' });
+          } else {
+            console.warn('Aviso de almacenamiento en Supabase Storage:', errUpload.message);
+            // Si el bucket está en creación o en modo local, creamos un blob URL visible en el navegador
+            try {
+              publicUrl = URL.createObjectURL(archivo);
+            } catch (errBlob) {
+              publicUrl = null;
+            }
+          }
+        } else {
+          try {
+            publicUrl = URL.createObjectURL(archivo);
+          } catch (errBlob) {
+            publicUrl = null;
           }
         }
 
