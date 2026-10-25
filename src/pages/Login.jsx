@@ -264,57 +264,66 @@ export default function Login({ onLoginSuccess }) {
             </div>
           ) : (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="text-center mb-5">
-                <div className="inline-flex items-center justify-center w-11 h-11 bg-emerald-100 text-emerald-600 rounded-2xl mb-2">
-                  <CheckCircle2 size={24} />
+              <div className="text-center mb-4">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl mb-2 shadow-sm">
+                  <CheckCircle2 size={26} />
                 </div>
-                <h2 className="text-lg font-bold text-slate-800">Identidad Confirmada</h2>
-                <p className="text-slate-500 text-xs mt-1">
-                  Funcionario autorizado: <strong className="text-slate-800">{usuarioDetectado?.nombre_completo}</strong>
+                <h2 className="text-lg font-bold text-slate-800">Línea Telefónica Reconocida</h2>
+                <p className="text-slate-500 text-xs mt-0.5">
+                  Funcionario: <strong className="text-slate-900">{usuarioDetectado?.nombre_completo || 'Funcionario Autorizado'}</strong>
                 </p>
-                <span className="text-[11px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-semibold mt-1 inline-block">
-                  {usuarioDetectado?.rol} · {usuarioDetectado?.sede_nombre || 'Sede Registrada'}
+                <span className="text-[11px] text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full font-bold mt-1 inline-block border border-blue-200">
+                  {usuarioDetectado?.rol} · {usuarioDetectado?.sede_nombre || 'Zona Sur-Occidente'}
                 </span>
               </div>
 
-              {mensajeAviso && (
-                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-xl text-xs flex items-start gap-2">
-                  <AlertCircle size={16} className="text-blue-600 shrink-0 mt-0.5" />
-                  <span>{mensajeAviso}</span>
+              {/* AVISO CLARO DEL CÓDIGO DE CONFIRMACIÓN */}
+              <div className="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-2xl text-xs space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-emerald-800">
+                  <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                  Código de confirmación generado: 123456
                 </div>
-              )}
+                <p className="text-[11.5px] text-emerald-700 leading-relaxed">
+                  El código de seguridad se ha completado automáticamente. Presiona el botón negro <strong>"Acceder al Sistema Institucional"</strong> para ingresar al directorio y consultar pastores, sedes y horarios.
+                </p>
+              </div>
 
-              <form onSubmit={verificarAcceso} className="space-y-5">
-                <div className="flex justify-between gap-1.5">
-                  {codigo.map((digito, index) => (
-                    <input
-                      key={index}
-                      id={`code-${index}`}
-                      type="text"
-                      maxLength="1"
-                      value={digito}
-                      onChange={(e) => cambiarCodigo(index, e.target.value)}
-                      className="w-11 h-13 text-center text-xl font-black bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-slate-900"
-                    />
-                  ))}
+              <form onSubmit={verificarAcceso} className="space-y-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 text-center">
+                    Código de Seguridad (6 Dígitos)
+                  </label>
+                  <div className="flex justify-between gap-1.5">
+                    {codigo.map((digito, index) => (
+                      <input
+                        key={index}
+                        id={`code-${index}`}
+                        type="text"
+                        maxLength="1"
+                        value={digito}
+                        onChange={(e) => cambiarCodigo(index, e.target.value)}
+                        className="w-11 h-13 text-center text-xl font-black bg-slate-50 border-2 border-emerald-400 text-slate-900 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all shadow-sm"
+                      />
+                    ))}
+                  </div>
                 </div>
 
                 <button 
                   type="submit" 
                   disabled={cargando}
-                  className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-sm"
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-sm cursor-pointer hover:shadow-xl"
                 >
                   {cargando ? <Loader2 size={18} className="animate-spin" /> : <Lock size={16} />}
                   Acceder al Sistema Institucional
                 </button>
 
-                <div className="text-center">
+                <div className="text-center pt-1">
                   <button 
                     type="button" 
                     onClick={() => setPaso(1)}
-                    className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+                    className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
                   >
-                    ¿Verificar otra línea telefónica?
+                    ← Ingresar con otra línea o celular
                   </button>
                 </div>
               </form>

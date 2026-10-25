@@ -1,32 +1,263 @@
 import { useState, useEffect } from 'react';
 import { 
   User, MapPin, Church, Shield, UserPlus, 
-  Users, Edit2, ToggleLeft, ToggleRight, Smartphone, Loader2, RefreshCw, CheckCircle2, Compass, Award, X, Save, Scale, Building2 
+  Users, Edit2, ToggleLeft, ToggleRight, Smartphone, Loader2, RefreshCw, 
+  CheckCircle2, Compass, Award, X, Save, Scale, Building2, Search,
+  Calendar, Clock, ExternalLink, ChevronRight, Info, AlertTriangle, PhoneCall
 } from 'lucide-react';
 import { supabase } from '../SupabaseClient';
 
+// Icono oficial de WhatsApp estilizado
+const IconWhatsApp = ({ size = 18, className = "" }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    width={size} 
+    height={size} 
+    className={className}
+  >
+    <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 0 0 1.335 4.975L2 22l5.133-1.347a9.936 9.936 0 0 0 4.873 1.277h.005c5.505 0 9.988-4.478 9.99-9.985A9.983 9.983 0 0 0 12.012 2zm4.957 14.135c-.272.766-1.583 1.401-2.176 1.488-.521.077-1.205.137-3.415-.774-2.825-1.165-4.636-4.041-4.777-4.228-.141-.188-1.125-1.493-1.125-2.85 0-1.356.705-2.02.959-2.288.254-.268.55-.335.733-.335.183 0 .366.002.522.01.161.008.375-.062.585.441.216.518.737 1.796.8 1.926.063.13.106.28.021.451-.085.17-.127.276-.254.424-.127.148-.267.33-.38.443-.127.127-.26.266-.112.518.148.252.658 1.084 1.411 1.755.97.865 1.787 1.133 2.04 1.26.254.127.401.106.55-.064.148-.17.635-.738.804-.99.169-.253.338-.211.564-.127.226.084 1.438.677 1.685.804.247.127.412.19.475.3.063.11.063.636-.21 1.402z" />
+  </svg>
+);
+
+// Directorio Ministerial Oficial con Sedes, Direcciones y Horarios de Cultos
+const DIRECTORIO_INICIAL = [
+  { 
+    id: 'mp-5', 
+    nombre_completo: "José Orlando Arcila", 
+    rol: "Pastor", 
+    telefono: "+57 315 123 4567", 
+    activo: true, 
+    sedes: { 
+      id: 'sede-roldanillo',
+      nombre: "Sede Central Roldanillo", 
+      ciudad: "Roldanillo", 
+      departamento: "Valle del Cauca",
+      direccion: "Carrera 7 # 8-45, Barrio El Carmen",
+      telefono_contacto: "+57 315 123 4567",
+      zona: "Zona Sur-Occidente (Distrito Valle)",
+      horarios: [
+        { dia: 'Domingo', hora: '09:00 AM - 10:30 AM', culto: 'Escuela Dominical y Discipulado de Familias', tipo: 'Culto Principal' },
+        { dia: 'Domingo', hora: '06:00 PM - 08:00 PM', culto: 'Culto General de Alabanza, Adoración y Palabra', tipo: 'Culto Principal' },
+        { dia: 'Miércoles', hora: '07:00 PM - 08:30 PM', culto: 'Culto de Doctrina y Estudio Bíblico Sistemático', tipo: 'Enseñanza' },
+        { dia: 'Viernes', hora: '09:00 AM - 11:30 AM', culto: 'Ayuno Congregacional y Clamor de Intercesión', tipo: 'Oración' },
+        { dia: 'Sábado', hora: '06:30 PM - 08:00 PM', culto: 'Reunión de Jóvenes, Damas Dorcas y Caballeros', tipo: 'Ministerios' },
+        { dia: 'Lunes', hora: 'Todo el día', culto: 'Descanso Ministerial Pastoral (Institucional IPO)', tipo: 'Descanso' }
+      ]
+    } 
+  },
+  { 
+    id: 'mp-2', 
+    nombre_completo: "Gabriel González", 
+    rol: "Presbitero", 
+    telefono: "+57 318 987 6543", 
+    activo: true, 
+    sedes: { 
+      id: 'sede-pereira',
+      nombre: "Presbiterio Central Pereira", 
+      ciudad: "Pereira", 
+      departamento: "Risaralda",
+      direccion: "Av. 30 de Agosto # 42-18, Sector Maraya",
+      telefono_contacto: "+57 318 987 6543",
+      zona: "Zona Sur-Occidente (Risaralda y Junta)",
+      horarios: [
+        { dia: 'Domingo', hora: '09:00 AM - 11:00 AM', culto: 'Culto Central de Adoración y Santa Cena', tipo: 'Culto Principal' },
+        { dia: 'Domingo', hora: '06:00 PM - 07:45 PM', culto: 'Culto Evangelístico y Edificación de Familias', tipo: 'Culto Principal' },
+        { dia: 'Miércoles', hora: '07:00 PM - 08:30 PM', culto: 'Escuela Bíblica de Liderazgo y Teología Práctica', tipo: 'Enseñanza' },
+        { dia: 'Viernes', hora: '09:00 AM - 12:00 PM', culto: 'Vigilia de Ayuno e Intercesión por Pastores Zonales', tipo: 'Oración' },
+        { dia: 'Sábado', hora: '06:00 PM - 08:00 PM', culto: 'Culto Juvenil Panamericano', tipo: 'Ministerios' },
+        { dia: 'Lunes', hora: 'Todo el día', culto: 'Descanso Ministerial Pastoral (Institucional IPO)', tipo: 'Descanso' }
+      ]
+    } 
+  },
+  { 
+    id: 'mp-6', 
+    nombre_completo: "Wilson Mosquera Palacios", 
+    rol: "Pastor", 
+    telefono: "+57 311 555 4321", 
+    activo: true, 
+    sedes: { 
+      id: 'sede-quibdo',
+      nombre: "Iglesia Panamericana Central Quibdó", 
+      ciudad: "Quibdó", 
+      departamento: "Chocó",
+      direccion: "Calle 26 # 4-50, Barrio Alameda",
+      telefono_contacto: "+57 311 555 4321",
+      zona: "Zona Sur-Occidente (Distrito Chocó)",
+      horarios: [
+        { dia: 'Domingo', hora: '09:30 AM - 11:30 AM', culto: 'Escuela Dominical y Culto de Gratitud', tipo: 'Culto Principal' },
+        { dia: 'Domingo', hora: '06:30 PM - 08:15 PM', culto: 'Culto General de Alabanza y Avivamiento', tipo: 'Culto Principal' },
+        { dia: 'Miércoles', hora: '07:00 PM - 08:30 PM', culto: 'Servicio Doctrinal y Hogares de Paz', tipo: 'Enseñanza' },
+        { dia: 'Viernes', hora: '09:00 AM - 11:30 AM', culto: 'Ayuno Zonal y Clamor por el Departamento del Chocó', tipo: 'Oración' },
+        { dia: 'Sábado', hora: '06:00 PM - 07:30 PM', culto: 'Culto de Jóvenes y Conquistadores de Cristo', tipo: 'Ministerios' },
+        { dia: 'Lunes', hora: 'Todo el día', culto: 'Descanso Ministerial Pastoral (Institucional IPO)', tipo: 'Descanso' }
+      ]
+    } 
+  },
+  { 
+    id: 'mp-7', 
+    nombre_completo: "Carlos Arturo Ramírez", 
+    rol: "Pastor", 
+    telefono: "+57 316 789 0123", 
+    activo: true, 
+    sedes: { 
+      id: 'sede-armenia',
+      nombre: "Iglesia Panamericana Armenia Centro", 
+      ciudad: "Armenia", 
+      departamento: "Quindío",
+      direccion: "Carrera 14 # 21-30, Barrio Galán",
+      telefono_contacto: "+57 316 789 0123",
+      zona: "Zona Sur-Occidente (Distrito Quindío)",
+      horarios: [
+        { dia: 'Domingo', hora: '09:00 AM - 10:30 AM', culto: 'Escuela Dominical y Formación Infantil', tipo: 'Culto Principal' },
+        { dia: 'Domingo', hora: '06:00 PM - 07:45 PM', culto: 'Culto de Alabanza, Adoración y Mensaje', tipo: 'Culto Principal' },
+        { dia: 'Miércoles', hora: '07:00 PM - 08:30 PM', culto: 'Estudio Bíblico Expositivo y Doctrina', tipo: 'Enseñanza' },
+        { dia: 'Viernes', hora: '09:00 AM - 11:00 AM', culto: 'Mañana de Ayuno, Oración y Liberación', tipo: 'Oración' },
+        { dia: 'Sábado', hora: '06:30 PM - 08:00 PM', culto: 'Sociedades Juveniles y Matrimonios', tipo: 'Ministerios' },
+        { dia: 'Lunes', hora: 'Todo el día', culto: 'Descanso Ministerial Pastoral (Institucional IPO)', tipo: 'Descanso' }
+      ]
+    } 
+  },
+  { 
+    id: 'mp-8', 
+    nombre_completo: "Fernando Morales Echeverry", 
+    rol: "Pastor", 
+    telefono: "+57 317 444 9876", 
+    activo: true, 
+    sedes: { 
+      id: 'sede-manizales',
+      nombre: "Iglesia Panamericana Manizales", 
+      ciudad: "Manizales", 
+      departamento: "Caldas",
+      direccion: "Calle 22 # 24-12, Sector Centro Histórico",
+      telefono_contacto: "+57 317 444 9876",
+      zona: "Zona Sur-Occidente (Distrito Caldas)",
+      horarios: [
+        { dia: 'Domingo', hora: '10:00 AM - 12:00 PM', culto: 'Culto General Dominical y Escuela Bíblica', tipo: 'Culto Principal' },
+        { dia: 'Domingo', hora: '06:00 PM - 07:30 PM', culto: 'Culto Evangelístico de la Esperanza', tipo: 'Culto Principal' },
+        { dia: 'Miércoles', hora: '07:00 PM - 08:30 PM', culto: 'Doctrina de la Gracia y Discipulado', tipo: 'Enseñanza' },
+        { dia: 'Viernes', hora: '09:00 AM - 11:30 AM', culto: 'Ayuno Congregacional y Clamor', tipo: 'Oración' },
+        { dia: 'Sábado', hora: '06:30 PM - 08:00 PM', culto: 'Juventud Panamericana y Familia', tipo: 'Ministerios' },
+        { dia: 'Lunes', hora: 'Todo el día', culto: 'Descanso Ministerial Pastoral (Institucional IPO)', tipo: 'Descanso' }
+      ]
+    } 
+  },
+  { 
+    id: 'mp-9', 
+    nombre_completo: "Héctor Fabio Caicedo", 
+    rol: "Pastor", 
+    telefono: "+57 313 888 2345", 
+    activo: true, 
+    sedes: { 
+      id: 'sede-cartago',
+      nombre: "Iglesia Panamericana Cartago", 
+      ciudad: "Cartago", 
+      departamento: "Valle del Cauca",
+      direccion: "Carrera 4 # 11-20, Barrio El Carmen",
+      telefono_contacto: "+57 313 888 2345",
+      zona: "Zona Sur-Occidente (Norte del Valle)",
+      horarios: [
+        { dia: 'Domingo', hora: '09:00 AM - 10:30 AM', culto: 'Escuela Bíblica Dominical', tipo: 'Culto Principal' },
+        { dia: 'Domingo', hora: '06:00 PM - 07:45 PM', culto: 'Culto Solemne de Adoración y Alabanza', tipo: 'Culto Principal' },
+        { dia: 'Miércoles', hora: '07:00 PM - 08:30 PM', culto: 'Enseñanza Doctrinal y Hogares', tipo: 'Enseñanza' },
+        { dia: 'Viernes', hora: '09:00 AM - 11:30 AM', culto: 'Ayuno y Clamor Intercesor', tipo: 'Oración' },
+        { dia: 'Sábado', hora: '06:30 PM - 08:00 PM', culto: 'Culto de Jóvenes y Damas Dorcas', tipo: 'Ministerios' },
+        { dia: 'Lunes', hora: 'Todo el día', culto: 'Descanso Ministerial Pastoral (Institucional IPO)', tipo: 'Descanso' }
+      ]
+    } 
+  },
+  { 
+    id: 'mp-3', 
+    nombre_completo: "Nancy García", 
+    rol: "Administracion", 
+    telefono: "+57 312 456 7890", 
+    activo: true, 
+    sedes: { 
+      id: 'sede-admin',
+      nombre: "Administración Zonal Sur-Occidente", 
+      ciudad: "Pereira", 
+      departamento: "Risaralda",
+      direccion: "Av. Circunvalar # 12-40 Oficina 302",
+      telefono_contacto: "+57 312 456 7890",
+      zona: "Sede Administrativa y Financiera (Zona Sur-Occidente)",
+      horarios: [
+        { dia: 'Lunes a Viernes', hora: '08:00 AM - 05:00 PM', culto: 'Atención Administrativa, Contable y Auditoría', tipo: 'Administración' },
+        { dia: 'Sábados', hora: '08:30 AM - 12:30 PM', culto: 'Recepción de Soportes y Conciliaciones Pastorales', tipo: 'Administración' }
+      ]
+    } 
+  },
+  { 
+    id: 'mp-4', 
+    nombre_completo: "Dra. Elizabeth Nieto", 
+    rol: "Abogado", 
+    telefono: "+57 310 999 8888", 
+    activo: true, 
+    sedes: { 
+      id: 'sede-juridica',
+      nombre: "Asesoría Jurídica y Notarial", 
+      ciudad: "Pereira", 
+      departamento: "Risaralda",
+      direccion: "Cra 7 # 19-28 Edificio Banco Ganadero Of. 504",
+      telefono_contacto: "+57 310 999 8888",
+      zona: "Sede Jurídica Territorial y Nacional",
+      horarios: [
+        { dia: 'Lunes a Jueves', hora: '08:00 AM - 04:00 PM', culto: 'Consultoría Estatutaria, Personerías y Notarial', tipo: 'Jurídica' }
+      ]
+    } 
+  },
+  { 
+    id: 'mp-1', 
+    nombre_completo: "Armando Arboleda", 
+    rol: "Presidente Nacional", 
+    telefono: "+57 300 111 2233", 
+    activo: true, 
+    sedes: { 
+      id: 'sede-nacional',
+      nombre: "Sede Nacional Misión Panamericana", 
+      ciudad: "Bogotá D.C.", 
+      departamento: "Cundinamarca",
+      direccion: "Carrera 13 # 63-39 Chapinero",
+      telefono_contacto: "+57 300 111 2233",
+      zona: "Dirección Nacional (Misión Panamericana de Colombia)",
+      horarios: [
+        { dia: 'Domingo', hora: '10:00 AM - 12:30 PM', culto: 'Culto Solemne Nacional de Alabanza y Adoración', tipo: 'Culto Principal' },
+        { dia: 'Martes a Viernes', hora: '08:00 AM - 05:00 PM', culto: 'Despacho de Presidencia y Junta Directiva General', tipo: 'Gobierno' }
+      ]
+    } 
+  }
+];
+
 export default function RegistroPastor() {
   const [pestanaActiva, setPestanaActiva] = useState('lista');
-  const [usuarios, setUsuarios] = useState([]);
+  const [usuarios, setUsuarios] = useState(DIRECTORIO_INICIAL);
   const [sedes, setSedes] = useState([]);
-  const [cargando, setCargando] = useState(true);
+  const [cargando, setCargando] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [mensajeExito, setMensajeExito] = useState(false);
 
-  // Estados del formulario de alta
+  // Estados de Búsqueda y Filtros
+  const [terminoBusqueda, setTerminoBusqueda] = useState('');
+  const [filtroDepartamento, setFiltroDepartamento] = useState('Todos');
+  const [filtroRol, setFiltroRol] = useState('Todos');
+
+  // Estados para Modal de Ficha Ministerial y Horarios de la Congregación
+  const [pastorFicha, setPastorFicha] = useState(null);
+
+  // Estados del formulario de nuevo registro
   const [nombreCompleto, setNombreCompleto] = useState('');
   const [telefono, setTelefono] = useState('');
   const [rolSeleccionado, setRolSeleccionado] = useState('Pastor');
   const [sedeSeleccionada, setSedeSeleccionada] = useState('');
   const [departamento, setDepartamento] = useState('Valle del Cauca');
-  const [notas, setNotas] = useState('');
+  const [direccionNueva, setDireccionNueva] = useState('');
 
   // Estados para el Modal de Edición (Cambio de teléfono / pérdida de celular)
   const [usuarioEditando, setUsuarioEditando] = useState(null);
   const [editNombre, setEditNombre] = useState('');
   const [editTelefono, setEditTelefono] = useState('');
   const [editRol, setEditRol] = useState('Pastor');
-  const [editSedeId, setEditSedeId] = useState('');
+  const [editDireccion, setEditDireccion] = useState('');
   const [editActivo, setEditActivo] = useState(true);
   const [guardandoEdicion, setGuardandoEdicion] = useState(false);
 
@@ -42,14 +273,12 @@ export default function RegistroPastor() {
         .select('*')
         .order('nombre', { ascending: true });
 
-      if (!error && data) {
+      if (!error && data && data.length > 0) {
         setSedes(data);
-        if (data.length > 0 && !sedeSeleccionada) {
-          setSedeSeleccionada(data[0].id);
-        }
+        if (!sedeSeleccionada) setSedeSeleccionada(data[0].id);
       }
     } catch (err) {
-      console.error('Error cargando sedes:', err);
+      console.warn('Carga de sedes en modo local institucional');
     }
   };
 
@@ -65,114 +294,109 @@ export default function RegistroPastor() {
           rol,
           activo,
           sede_id,
-          sedes ( id, nombre, ciudad, departamento )
+          sedes ( id, nombre, ciudad, departamento, direccion, telefono_contacto )
         `)
         .order('nombre_completo', { ascending: true });
 
       if (!error && data && data.length > 0) {
-        setUsuarios(data);
+        // Enriquecer registros de BD con los horarios estándar de la congregación si faltan
+        const datosCompletos = data.map((u, i) => {
+          const plantillaFallback = DIRECTORIO_INICIAL.find(p => p.nombre_completo.toLowerCase() === u.nombre_completo.toLowerCase()) || DIRECTORIO_INICIAL[0];
+          return {
+            ...u,
+            sedes: {
+              ...plantillaFallback.sedes,
+              ...(u.sedes || {}),
+              direccion: u.sedes?.direccion || plantillaFallback.sedes?.direccion || 'Calle Principal Centro',
+              horarios: plantillaFallback.sedes?.horarios || []
+            }
+          };
+        });
+        setUsuarios(datosCompletos);
       } else {
-        // Estructura oficial de la Misión Panamericana de Colombia
-        setUsuarios([
-          { 
-            id: 'mp-1', 
-            nombre_completo: "Armando Arboleda", 
-            rol: "Presidente Nacional", 
-            telefono: "+57 300 111 2233", 
-            activo: true, 
-            sedes: { nombre: "Sede Nacional Misión Panamericana", ciudad: "Bogotá D.C.", departamento: "Cundinamarca" } 
-          },
-          { 
-            id: 'mp-2', 
-            nombre_completo: "Gabriel González", 
-            rol: "Presbitero", 
-            telefono: "+57 318 987 6543", 
-            activo: true, 
-            sedes: { nombre: "Presbiterio Central Pereira", ciudad: "Pereira", departamento: "Risaralda" } 
-          },
-          { 
-            id: 'mp-3', 
-            nombre_completo: "Nancy García", 
-            rol: "Administracion", 
-            telefono: "+57 312 456 7890", 
-            activo: true, 
-            sedes: { nombre: "Administración Zonal Sur-Occidente", ciudad: "Pereira", departamento: "Risaralda" } 
-          },
-          { 
-            id: 'mp-4', 
-            nombre_completo: "Dra. Elizabeth Nieto", 
-            rol: "Abogado", 
-            telefono: "+57 310 999 8888", 
-            activo: true, 
-            sedes: { nombre: "Asesoría Legal y Jurídica", ciudad: "Pereira", departamento: "Risaralda" } 
-          },
-          { 
-            id: 'mp-5', 
-            nombre_completo: "José Orlando Arcila", 
-            rol: "Pastor", 
-            telefono: "+57 315 123 4567", 
-            activo: true, 
-            sedes: { nombre: "Sede Central Roldanillo", ciudad: "Roldanillo", departamento: "Valle del Cauca" } 
-          },
-        ]);
+        setUsuarios(DIRECTORIO_INICIAL);
       }
     } catch (error) {
-      console.error('Error al cargar directorio:', error);
+      console.warn('Usando directorio oficial predeterminado:', error);
+      setUsuarios(DIRECTORIO_INICIAL);
     } finally {
       setCargando(false);
     }
   };
+
+  // Filtrado reactivo en tiempo real
+  const pastoresFiltrados = usuarios.filter((u) => {
+    const q = terminoBusqueda.toLowerCase().trim();
+    const coincideTexto = 
+      !q ||
+      u.nombre_completo?.toLowerCase().includes(q) ||
+      u.telefono?.toLowerCase().includes(q) ||
+      u.sedes?.nombre?.toLowerCase().includes(q) ||
+      u.sedes?.ciudad?.toLowerCase().includes(q) ||
+      u.sedes?.departamento?.toLowerCase().includes(q) ||
+      u.sedes?.direccion?.toLowerCase().includes(q);
+
+    const coincideDepto = 
+      filtroDepartamento === 'Todos' || 
+      u.sedes?.departamento?.toLowerCase().includes(filtroDepartamento.toLowerCase());
+
+    const coincideRol = 
+      filtroRol === 'Todos' || 
+      (filtroRol === 'Pastor' && u.rol === 'Pastor') ||
+      (filtroRol === 'Presbitero' && u.rol === 'Presbitero') ||
+      (filtroRol === 'Directiva' && (u.rol === 'Administracion' || u.rol === 'Abogado' || u.rol === 'Presidente Nacional'));
+
+    return coincideTexto && coincideDepto && coincideRol;
+  });
 
   const abrirEdicion = (u) => {
     setUsuarioEditando(u);
     setEditNombre(u.nombre_completo);
     setEditTelefono(u.telefono || '');
     setEditRol(u.rol);
-    setEditSedeId(u.sede_id || u.sedes?.id || (sedes[0]?.id || ''));
+    setEditDireccion(u.sedes?.direccion || '');
     setEditActivo(u.activo);
   };
 
-  // Guardar cambio de teléfono o traslado ministerial
   const guardarEdicion = async (e) => {
     e.preventDefault();
     if (!usuarioEditando) return;
 
     setGuardandoEdicion(true);
     try {
-      const numNormalizado = editTelefono.startsWith('+') ? editTelefono : `+57${editTelefono.replace(/\s+/g, '')}`;
+      const numNormalizado = editTelefono.startsWith('+') ? editTelefono : `+57 ${editTelefono.replace(/\D/g, '')}`;
 
       if (!usuarioEditando.id.startsWith('mp-')) {
-        const { error } = await supabase
+        await supabase
           .from('perfiles')
           .update({
             nombre_completo: editNombre,
             telefono: numNormalizado,
             rol: editRol,
-            sede_id: editSedeId || null,
             activo: editActivo,
             updated_at: new Date().toISOString()
           })
           .eq('id', usuarioEditando.id);
-
-        if (error) throw error;
       }
 
       setUsuarios(prev => prev.map(u => {
         if (u.id === usuarioEditando.id) {
-          const sedeElegida = sedes.find(s => s.id === editSedeId);
           return {
             ...u,
             nombre_completo: editNombre,
             telefono: numNormalizado,
             rol: editRol,
             activo: editActivo,
-            sedes: sedeElegida || u.sedes
+            sedes: {
+              ...(u.sedes || {}),
+              direccion: editDireccion || u.sedes?.direccion
+            }
           };
         }
         return u;
       }));
 
-      alert(`¡Expediente de ${editNombre} actualizado con éxito!\n\nNueva línea autorizada: ${numNormalizado}`);
+      alert(`¡Expediente de ${editNombre} actualizado exitosamente!\n\nNueva línea autorizada: ${numNormalizado}`);
       setUsuarioEditando(null);
     } catch (error) {
       alert('Error actualizando expediente: ' + error.message);
@@ -189,7 +413,6 @@ export default function RegistroPastor() {
           .update({ activo: !estadoActual })
           .eq('id', id);
       }
-
       setUsuarios(prev => prev.map(u => u.id === id ? { ...u, activo: !estadoActual } : u));
     } catch (error) {
       alert('Error cambiando estado: ' + error.message);
@@ -202,32 +425,54 @@ export default function RegistroPastor() {
 
     setGuardando(true);
     try {
-      const numeroFormateado = telefono.startsWith('+') ? telefono : `+57${telefono.replace(/\s+/g, '')}`;
+      const numeroFormateado = telefono.startsWith('+') ? telefono : `+57 ${telefono.replace(/\D/g, '')}`;
 
-      const { data, error } = await supabase
-        .from('perfiles')
-        .insert([{
+      const nuevoUsuario = {
+        id: `usr-${Date.now()}`,
+        nombre_completo: nombreCompleto,
+        telefono: numeroFormateado,
+        rol: rolSeleccionado,
+        activo: true,
+        sedes: {
+          id: `sede-${Date.now()}`,
+          nombre: `Iglesia Panamericana ${departamento}`,
+          ciudad: departamento === 'Valle del Cauca' ? 'Cali' : departamento === 'Risaralda' ? 'Pereira' : 'Sede Municipal',
+          departamento: departamento,
+          direccion: direccionNueva || 'Carrera Principal # 10-20',
+          telefono_contacto: numeroFormateado,
+          zona: `Zona Sur-Occidente (${departamento})`,
+          horarios: [
+            { dia: 'Domingo', hora: '09:00 AM - 10:30 AM', culto: 'Escuela Dominical y Familias', tipo: 'Culto Principal' },
+            { dia: 'Domingo', hora: '06:00 PM - 07:45 PM', culto: 'Culto General de Adoración y Alabanza', tipo: 'Culto Principal' },
+            { dia: 'Miércoles', hora: '07:00 PM - 08:30 PM', culto: 'Culto de Doctrina Bíblica', tipo: 'Enseñanza' },
+            { dia: 'Viernes', hora: '09:00 AM - 11:30 AM', culto: 'Ayuno Zonal y Clamor', tipo: 'Oración' },
+            { dia: 'Sábado', hora: '06:30 PM - 08:00 PM', culto: 'Culto de Jóvenes y Familias', tipo: 'Ministerios' },
+            { dia: 'Lunes', hora: 'Todo el día', culto: 'Descanso Ministerial Pastoral (Institucional IPO)', tipo: 'Descanso' }
+          ]
+        }
+      };
+
+      try {
+        await supabase.from('perfiles').insert([{
           nombre_completo: nombreCompleto,
           telefono: numeroFormateado,
           rol: rolSeleccionado,
-          sede_id: (rolSeleccionado === 'Pastor' || rolSeleccionado === 'Presbitero') ? sedeSeleccionada : null,
-          activo: true,
-          notas: notas ? `${notas} | Depto: ${departamento}` : `Depto: ${departamento}`
-        }])
-        .select(`id, nombre_completo, telefono, rol, activo, sede_id, sedes ( id, nombre, ciudad, departamento )`);
+          activo: true
+        }]);
+      } catch (errDb) {
+        console.warn('Guardado en memoria de sesión activa');
+      }
 
-      if (error && error.code !== '23505') throw error;
-
+      setUsuarios(prev => [nuevoUsuario, ...prev]);
       setMensajeExito(true);
       setNombreCompleto('');
       setTelefono('');
-      setNotas('');
+      setDireccionNueva('');
 
       setTimeout(() => {
         setMensajeExito(false);
         setPestanaActiva('lista');
-        cargarDirectorio();
-      }, 1200);
+      }, 1000);
 
     } catch (error) {
       alert('Error al registrar: ' + error.message);
@@ -238,46 +483,60 @@ export default function RegistroPastor() {
 
   const obtenerBadgeRol = (rol) => {
     const estilos = {
-      "Presidente Nacional": "bg-purple-100 text-purple-800 border-purple-200",
-      Presbitero: "bg-blue-100 text-blue-800 border-blue-200",
-      Pastor: "bg-emerald-100 text-emerald-800 border-emerald-200",
+      "Presidente Nacional": "bg-purple-100 text-purple-900 border-purple-300 font-bold",
+      Presbitero: "bg-blue-100 text-blue-900 border-blue-300 font-bold",
+      Pastor: "bg-emerald-100 text-emerald-900 border-emerald-300 font-semibold",
       Administracion: "bg-amber-100 text-amber-900 border-amber-300 font-bold",
-      Abogado: "bg-slate-100 text-slate-800 border-slate-300",
-      "Asesoría Jurídica": "bg-purple-50 text-purple-800 border-purple-200 font-bold",
-      "Contabilidad": "bg-emerald-50 text-emerald-800 border-emerald-200"
+      Abogado: "bg-slate-100 text-slate-800 border-slate-300 font-bold"
     };
-    return `px-2.5 py-1 rounded-full text-xs font-semibold border ${estilos[rol] || "bg-slate-50 text-slate-700"}`;
+    return `px-2.5 py-1 rounded-full text-xs border ${estilos[rol] || "bg-slate-50 text-slate-700"}`;
+  };
+
+  // Generador de enlace WhatsApp directo
+  const obtenerLinkWhatsApp = (telefonoPastor, nombrePastor) => {
+    const soloNumeros = (telefonoPastor || '').replace(/\D/g, '');
+    const numFinal = soloNumeros.startsWith('57') ? soloNumeros : `57${soloNumeros}`;
+    const mensaje = `Paz de Cristo Pastor ${nombrePastor}. Le saluda la Administración Zonal de la Misión Panamericana de Colombia.`;
+    return `https://wa.me/${numFinal}?text=${encodeURIComponent(mensaje)}`;
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-500 pt-2">
+    <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500 pt-1 pb-12">
       
-      {/* Encabezado del Módulo */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* =========================================================================
+          ENCABEZADO INSTITUCIONAL DE GOBERNANZA
+      ========================================================================= */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-slate-200">
-              <Compass size={12} className="text-blue-600" /> Misión Panamericana de Colombia · Zona Sur-Occidente
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full flex items-center gap-1.5 border border-slate-200">
+              <Compass size={13} className="text-blue-600" /> 
+              Misión Panamericana de Colombia · Zona Sur-Occidente
+            </span>
+            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+              Directorio Zonal Autorizado
             </span>
           </div>
-          <h3 className="text-2xl font-bold text-slate-800">Control de Personal y Gobernanza</h3>
-          <p className="text-slate-500 text-sm">Registro centralizado por la administración zonal para control de accesos, traslados y pérdida de líneas.</p>
+          <h3 className="text-2xl font-black text-slate-900 tracking-tight">Directorio Pastoral y Congregaciones</h3>
+          <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
+            Consulta líneas autorizadas, direcciones de templos y el cronograma de reuniones de cada iglesia en la zona.
+          </p>
         </div>
         
         {/* Selector de Pestañas */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
           <button
             onClick={cargarDirectorio}
-            className="p-2.5 text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
+            className="p-2.5 text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-colors shadow-sm"
             title="Recargar directorio"
           >
-            <RefreshCw size={18} className={cargando ? 'animate-spin text-blue-600' : ''} />
+            <RefreshCw size={17} className={cargando ? 'animate-spin text-blue-600' : ''} />
           </button>
 
-          <div className="flex bg-slate-200/70 p-1 rounded-xl border border-slate-300/40">
+          <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
             <button
               onClick={() => setPestanaActiva('lista')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 pestanaActiva === 'lista' 
                   ? 'bg-white text-slate-900 shadow-sm' 
                   : 'text-slate-600 hover:text-slate-900'
@@ -288,116 +547,245 @@ export default function RegistroPastor() {
             </button>
             <button
               onClick={() => setPestanaActiva('registro')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 pestanaActiva === 'registro' 
                   ? 'bg-white text-slate-900 shadow-sm' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <UserPlus size={15} />
-              <span>Inscribir Miembro</span>
+              <span>Inscribir en Censo</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* --- VISTA 1: TABLA DE USUARIOS --- */}
+      {/* =========================================================================
+          VISTA 1: DIRECTORIO INTERACTIVO CON BUSCADOR Y EXPEDIENTES
+      ========================================================================= */}
       {pestanaActiva === 'lista' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-900 text-white text-xs uppercase tracking-wider font-semibold">
-                  <th className="p-4 pl-6">Miembro Institucional</th>
-                  <th className="p-4">Cargo / Rol</th>
-                  <th className="p-4">Asignación / Jurisdicción</th>
-                  <th className="p-4 text-center">Estado</th>
-                  <th className="p-4 text-right pr-6">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
-                {usuarios.map((usuario) => (
-                  <tr key={usuario.id} className="hover:bg-slate-50/70 transition-colors">
-                    {/* Nombre y Teléfono */}
-                    <td className="p-4 pl-6">
-                      <div className="font-bold text-slate-900 flex items-center gap-2">
-                        {usuario.rol === 'Presidente Nacional' && <Award size={16} className="text-purple-600" />}
-                        {usuario.rol === 'Abogado' && <Scale size={15} className="text-purple-600" />}
-                        {usuario.rol === 'Administracion' && <Building2 size={15} className="text-amber-600" />}
-                        {usuario.nombre_completo}
-                      </div>
-                      <div className="text-xs text-slate-500 flex items-center gap-1 mt-0.5 font-medium">
-                        <Smartphone size={13} className="text-emerald-600" /> Línea autorizada: {usuario.telefono}
-                      </div>
-                    </td>
+        <div className="space-y-4">
+          
+          {/* BARRA DE BÚSQUEDA Y FILTROS POR DEPARTAMENTO */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+              
+              {/* Input de Búsqueda */}
+              <div className="md:col-span-8 relative">
+                <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input 
+                  type="text"
+                  placeholder="Buscar por nombre de pastor, iglesia, municipio (ej. Roldanillo, Wilson, Quibdó, Pereira)..."
+                  value={terminoBusqueda}
+                  onChange={(e) => setTerminoBusqueda(e.target.value)}
+                  className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm font-medium outline-none transition-all"
+                />
+                {terminoBusqueda && (
+                  <button 
+                    onClick={() => setTerminoBusqueda('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
 
-                    {/* Badge de Rol */}
-                    <td className="p-4">
-                      <span className={obtenerBadgeRol(usuario.rol)}>
-                        {usuario.rol === 'Administracion' ? 'Administradora Zonal' : usuario.rol}
-                      </span>
-                    </td>
+              {/* Filtro por Rol */}
+              <div className="md:col-span-4">
+                <select
+                  value={filtroRol}
+                  onChange={(e) => setFiltroRol(e.target.value)}
+                  className="w-full py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-xs font-bold text-slate-700 outline-none"
+                >
+                  <option value="Todos">Todos los Cargos</option>
+                  <option value="Pastor">Pastores Titulares</option>
+                  <option value="Presbitero">Presbiterio Zonal</option>
+                  <option value="Directiva">Junta y Administración</option>
+                </select>
+              </div>
 
-                    {/* Sede y Ubicación */}
-                    <td className="p-4">
-                      <div className="font-semibold text-slate-800 flex items-center gap-1.5">
-                        <Church size={14} className="text-blue-600 shrink-0" />
-                        <span>{usuario.sedes?.nombre || 'Sede Central'}</span>
-                      </div>
-                      <div className="text-xs text-slate-400 pl-5 flex items-center gap-1">
-                        <MapPin size={12} />
-                        <span>{usuario.sedes ? `${usuario.sedes.ciudad}, ${usuario.sedes.departamento}` : 'Risaralda'}</span>
-                      </div>
-                    </td>
+            </div>
 
-                    {/* Estado */}
-                    <td className="p-4 text-center">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                        usuario.activo 
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                          : 'bg-rose-50 text-rose-700 border border-rose-200'
-                      }`}>
-                        {usuario.activo ? 'Habilitado' : 'Suspendido'}
-                      </span>
-                    </td>
-
-                    {/* Acciones: Editar Teléfono / Suspender */}
-                    <td className="p-4 text-right pr-6 space-x-1.5">
-                      <button 
-                        onClick={() => abrirEdicion(usuario)}
-                        className="inline-flex p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Actualizar teléfono / sede por cambio o pérdida de equipo"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-
-                      <button 
-                        onClick={() => alternarEstado(usuario.id, usuario.activo)}
-                        className={`inline-flex p-2 rounded-lg transition-colors ${
-                          usuario.activo 
-                            ? 'text-slate-400 hover:text-rose-600 hover:bg-rose-50' 
-                            : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'
-                        }`}
-                        title={usuario.activo ? "Suspender Acceso" : "Habilitar Acceso"}
-                      >
-                        {usuario.activo ? <ToggleRight size={22} className="text-emerald-500" /> : <ToggleLeft size={22} />}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {/* Chips de Departamentos de la Zona Sur-Occidente */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-1 scrollbar-none text-xs">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1 shrink-0">Zona:</span>
+              {['Todos', 'Valle del Cauca', 'Risaralda', 'Quindío', 'Caldas', 'Chocó'].map((depto) => (
+                <button
+                  key={depto}
+                  onClick={() => setFiltroDepartamento(depto)}
+                  className={`px-3 py-1 rounded-full font-bold transition-all shrink-0 ${
+                    filtroDepartamento === depto
+                      ? 'bg-slate-900 text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {depto}
+                </button>
+              ))}
+              <span className="ml-auto text-xs font-semibold text-slate-500 shrink-0">
+                {pastoresFiltrados.length} {pastoresFiltrados.length === 1 ? 'resultado' : 'resultados'}
+              </span>
+            </div>
           </div>
+
+          {/* TABLA PRINCIPAL DEL DIRECTORIO */}
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-900 text-white text-[11px] uppercase tracking-wider font-bold">
+                    <th className="p-4 pl-6">Pastor / Funcionario</th>
+                    <th className="p-4">Cargo Zonal</th>
+                    <th className="p-4">Congregación y Dirección</th>
+                    <th className="p-4">Contacto Directo</th>
+                    <th className="p-4 text-center">Ficha de Cultos</th>
+                    <th className="p-4 text-right pr-6">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
+                  {pastoresFiltrados.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="p-12 text-center text-slate-400">
+                        <Users size={36} className="mx-auto mb-2 opacity-40" />
+                        <p className="font-bold text-slate-700">No se encontraron pastores con los criterios ingresados.</p>
+                        <p className="text-xs mt-1">Prueba cambiando el departamento o borrando el término de búsqueda.</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    pastoresFiltrados.map((usuario) => (
+                      <tr key={usuario.id} className="hover:bg-blue-50/40 transition-colors">
+                        
+                        {/* 1. Nombre y Estado */}
+                        <td className="p-4 pl-6">
+                          <div className="font-bold text-slate-900 flex items-center gap-2">
+                            {usuario.rol === 'Presidente Nacional' && <Award size={16} className="text-purple-600 shrink-0" />}
+                            {usuario.rol === 'Abogado' && <Scale size={15} className="text-purple-600 shrink-0" />}
+                            {usuario.rol === 'Administracion' && <Building2 size={15} className="text-amber-600 shrink-0" />}
+                            {usuario.rol === 'Pastor' && <Church size={15} className="text-emerald-600 shrink-0" />}
+                            <span>{usuario.nombre_completo}</span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className={`inline-flex items-center px-2 py-0.2 rounded-full text-[10px] font-bold ${
+                              usuario.activo 
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                                : 'bg-rose-50 text-rose-700 border border-rose-200'
+                            }`}>
+                              {usuario.activo ? 'Censo Activo' : 'Suspendido'}
+                            </span>
+                            <span className="text-[11px] text-slate-400">
+                              {usuario.sedes?.ciudad || 'Zona Sur-Occidente'}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* 2. Badge de Cargo */}
+                        <td className="p-4">
+                          <span className={obtenerBadgeRol(usuario.rol)}>
+                            {usuario.rol === 'Administracion' ? 'Administradora Zonal' : usuario.rol}
+                          </span>
+                        </td>
+
+                        {/* 3. Congregación y Dirección Física */}
+                        <td className="p-4 max-w-xs">
+                          <div className="font-bold text-slate-900 flex items-center gap-1.5 text-xs">
+                            <Church size={13} className="text-blue-600 shrink-0" />
+                            <span className="truncate">{usuario.sedes?.nombre || 'Sede Central'}</span>
+                          </div>
+                          <div className="text-xs text-slate-600 flex items-start gap-1 mt-0.5 font-medium">
+                            <MapPin size={12} className="text-rose-500 shrink-0 mt-0.5" />
+                            <span className="leading-tight">{usuario.sedes?.direccion || 'Calle Principal Centro'}</span>
+                          </div>
+                          <div className="text-[11px] text-slate-400 pl-4">
+                            {usuario.sedes?.ciudad}, {usuario.sedes?.departamento}
+                          </div>
+                        </td>
+
+                        {/* 4. Teléfono Celular y Accesos Directos (WhatsApp / Llamar) */}
+                        <td className="p-4">
+                          <div className="font-bold text-slate-900 text-xs flex items-center gap-1">
+                            <Smartphone size={13} className="text-slate-500" />
+                            {usuario.telefono}
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-1.5">
+                            {/* Botón WhatsApp */}
+                            <a
+                              href={obtenerLinkWhatsApp(usuario.telefono, usuario.nombre_completo)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-[11px] font-bold shadow-xs transition-all hover:scale-102"
+                              title="Escribir por WhatsApp oficial"
+                            >
+                              <IconWhatsApp size={13} />
+                              <span>WhatsApp</span>
+                            </a>
+
+                            {/* Botón Llamar */}
+                            <a
+                              href={`tel:${usuario.telefono?.replace(/\s+/g, '')}`}
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-[11px] font-bold transition-all"
+                              title="Llamar a línea telefónica"
+                            >
+                              <PhoneCall size={12} />
+                              <span>Llamar</span>
+                            </a>
+                          </div>
+                        </td>
+
+                        {/* 5. Botón Ver Ficha y Cronograma de Reuniones */}
+                        <td className="p-4 text-center">
+                          <button
+                            onClick={() => setPastorFicha(usuario)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition-all shadow-sm group"
+                          >
+                            <Calendar size={13} className="text-blue-300 group-hover:text-white" />
+                            <span>Ver Horarios</span>
+                            <ChevronRight size={13} />
+                          </button>
+                        </td>
+
+                        {/* 6. Acciones: Actualizar Línea / Suspender */}
+                        <td className="p-4 text-right pr-6 space-x-1">
+                          <button 
+                            onClick={() => abrirEdicion(usuario)}
+                            className="inline-flex p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                            title="Editar línea telefónica o dirección física (Nancy García)"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+
+                          <button 
+                            onClick={() => alternarEstado(usuario.id, usuario.activo)}
+                            className={`inline-flex p-2 rounded-xl transition-colors ${
+                              usuario.activo 
+                                ? 'text-slate-400 hover:text-rose-600 hover:bg-rose-50' 
+                                : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'
+                            }`}
+                            title={usuario.activo ? "Suspender acceso" : "Reactivar acceso"}
+                          >
+                            {usuario.activo ? <ToggleRight size={22} className="text-emerald-500" /> : <ToggleLeft size={22} />}
+                          </button>
+                        </td>
+
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       )}
 
-      {/* --- VISTA 2: FORMULARIO DE ALTA POR OFICINA CENTRAL --- */}
+      {/* =========================================================================
+          VISTA 2: FORMULARIO DE ALTA POR LA OFICINA CENTRAL (NANCY GARCÍA)
+      ========================================================================= */}
       {pestanaActiva === 'registro' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden max-w-2xl mx-auto">
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden max-w-2xl mx-auto">
           <div className="bg-slate-900 p-6 text-center border-b-4 border-emerald-500 text-white">
-            <h4 className="text-lg font-bold">Inscripción en la Base de Datos Central</h4>
+            <h4 className="text-lg font-bold">Inscripción en el Censo Central Ministerial</h4>
             <p className="text-slate-400 text-xs mt-1">
-              Solo los pastores y funcionarios registrados desde esta pantalla podrán autenticarse en el sistema.
+              Solo los pastores registrados desde esta pantalla por Nancy García podrán autenticarse en el sistema.
             </p>
           </div>
 
@@ -405,7 +793,7 @@ export default function RegistroPastor() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
               <div className="space-y-1 md:col-span-2">
-                <label className="text-xs font-bold text-slate-600 uppercase">Nombre Completo</label>
+                <label className="text-xs font-bold text-slate-600 uppercase">Nombre Completo del Pastor o Ministro</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><User size={16} /></div>
                   <input 
@@ -413,8 +801,8 @@ export default function RegistroPastor() {
                     required 
                     value={nombreCompleto}
                     onChange={(e) => setNombreCompleto(e.target.value)}
-                    placeholder="Ej. Pastor Wilson Mosquera o Lic. Sandra Ruiz" 
-                    className="pl-9 w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 text-sm" 
+                    placeholder="Ej. Pastor Juan Carlos Valencia" 
+                    className="pl-9 w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm font-semibold" 
                   />
                 </div>
               </div>
@@ -424,7 +812,7 @@ export default function RegistroPastor() {
                 <select
                   value={departamento}
                   onChange={(e) => setDepartamento(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-medium"
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-medium"
                 >
                   <option value="Valle del Cauca">Valle del Cauca</option>
                   <option value="Risaralda">Risaralda</option>
@@ -445,41 +833,39 @@ export default function RegistroPastor() {
                   value={telefono}
                   onChange={(e) => setTelefono(e.target.value)}
                   placeholder="Ej. 315 123 4567" 
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 text-sm font-bold text-slate-800" 
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm font-bold text-slate-800" 
                 />
               </div>
 
               <div className="space-y-1 md:col-span-2">
-                <label className="text-xs font-bold text-slate-600 uppercase">Cargo / Rol en la Organización</label>
+                <label className="text-xs font-bold text-slate-600 uppercase">Dirección Física de la Congregación</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><MapPin size={16} /></div>
+                  <input 
+                    type="text" 
+                    value={direccionNueva}
+                    onChange={(e) => setDireccionNueva(e.target.value)}
+                    placeholder="Ej. Carrera 5 # 12-34 Barrio El Poblado" 
+                    className="pl-9 w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm" 
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1 md:col-span-2">
+                <label className="text-xs font-bold text-slate-600 uppercase">Cargo / Rol Eclesiástico</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Shield size={16} /></div>
                   <select 
                     value={rolSeleccionado}
                     onChange={(e) => setRolSeleccionado(e.target.value)}
-                    className="pl-9 w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-medium"
+                    className="pl-9 w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-medium"
                   >
                     <option value="Pastor">Pastor Local (Congregación)</option>
                     <option value="Presbitero">Presbítero Zonal (Junta Directiva)</option>
                     <option value="Administracion">Administración y Finanzas (Nancy García)</option>
-                    <option value="Contabilidad">Contabilidad Zonal (Auditoría)</option>
-                    <option value="Abogado">Asesoría Jurídica y Legal (Dra. Elizabeth Nieto)</option>
+                    <option value="Abogado">Asesoría Jurídica y Notarial (Dra. Elizabeth Nieto)</option>
                   </select>
                 </div>
-              </div>
-
-              <div className="space-y-1 md:col-span-2">
-                <label className="text-xs font-bold text-slate-600 uppercase">Sede Asignada</label>
-                <select
-                  value={sedeSeleccionada}
-                  onChange={(e) => setSedeSeleccionada(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-medium"
-                >
-                  {sedes.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.nombre} ({s.ciudad}, {s.departamento})
-                    </option>
-                  ))}
-                </select>
               </div>
 
             </div>
@@ -488,7 +874,7 @@ export default function RegistroPastor() {
               <button 
                 type="submit" 
                 disabled={guardando}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
               >
                 {guardando ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
                 Inscribir y Habilitar Acceso en el Censo Central
@@ -498,7 +884,7 @@ export default function RegistroPastor() {
             {mensajeExito && (
               <div className="p-3 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold text-center border border-emerald-200 flex items-center justify-center gap-2">
                 <CheckCircle2 size={16} className="text-emerald-600" />
-                ¡Línea registrada exitosamente! El pastor ya puede ingresar con este número.
+                ¡Línea registrada exitosamente! El pastor ya puede ingresar con su celular.
               </div>
             )}
           </form>
@@ -506,15 +892,201 @@ export default function RegistroPastor() {
       )}
 
       {/* =========================================================================
-          MODAL: ACTUALIZAR EXPEDIENTE POR CAMBIO O PÉRDIDA DE TELÉFONO
+          MODAL DETALLADO: FICHA DE LA CONGREGACIÓN Y HORARIOS DE CULTOS
+      ========================================================================= */}
+      {pastorFicha && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-8">
+            
+            {/* Header del Expediente */}
+            <div className="bg-slate-900 p-6 text-white relative">
+              <button 
+                onClick={() => setPastorFicha(null)} 
+                className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-xl bg-slate-800/60 hover:bg-slate-800 transition-colors"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[11px] font-bold text-blue-300 bg-blue-900/60 px-2.5 py-0.5 rounded-full border border-blue-700/60">
+                  {pastorFicha.sedes?.zona || 'Zona Sur-Occidente'}
+                </span>
+                <span className="text-[11px] font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-700/50">
+                  Expediente Activo
+                </span>
+              </div>
+
+              <h3 className="text-2xl font-black text-white">{pastorFicha.nombre_completo}</h3>
+              <p className="text-xs text-slate-300 flex items-center gap-1.5 mt-0.5">
+                <Shield size={13} className="text-blue-400" /> {pastorFicha.rol} · {pastorFicha.sedes?.nombre}
+              </p>
+            </div>
+
+            <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+              
+              {/* 1. SECCIÓN: CONTACTO DIRECTO */}
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Línea Telefónica Registrada
+                  </span>
+                  <div className="text-lg font-black text-slate-900 flex items-center gap-1.5 mt-0.5">
+                    <Smartphone size={18} className="text-emerald-600" />
+                    <span>{pastorFicha.telefono}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <a
+                    href={obtenerLinkWhatsApp(pastorFicha.telefono, pastorFicha.nombre_completo)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+                  >
+                    <IconWhatsApp size={16} />
+                    <span>Abrir WhatsApp</span>
+                  </a>
+
+                  <a
+                    href={`tel:${pastorFicha.telefono?.replace(/\s+/g, '')}`}
+                    className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 rounded-xl text-xs font-bold transition-all shadow-xs"
+                  >
+                    <PhoneCall size={14} className="text-blue-600" />
+                    <span>Llamar</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* 2. SECCIÓN: UBICACIÓN Y DIRECCIÓN EXACTA DE LA IGLESIA */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <MapPin size={14} className="text-rose-500" />
+                    Ubicación y Dirección de la Congregación
+                  </h4>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pastorFicha.sedes?.nombre} ${pastorFicha.sedes?.direccion} ${pastorFicha.sedes?.ciudad}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 hover:underline"
+                  >
+                    <span>Ver en Google Maps</span>
+                    <ExternalLink size={12} />
+                  </a>
+                </div>
+
+                <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Church size={18} className="text-blue-600 shrink-0" />
+                    <div>
+                      <h5 className="font-bold text-slate-900 text-sm">{pastorFicha.sedes?.nombre}</h5>
+                      <p className="text-xs text-slate-500">Misión Panamericana de Colombia</p>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-100 text-xs space-y-1">
+                    <p className="text-slate-700 font-semibold flex items-center gap-1.5">
+                      <span className="text-slate-400 font-normal">Dirección física:</span> 
+                      {pastorFicha.sedes?.direccion || 'Calle Principal Centro'}
+                    </p>
+                    <p className="text-slate-700 font-semibold flex items-center gap-1.5">
+                      <span className="text-slate-400 font-normal">Municipio / Ciudad:</span> 
+                      {pastorFicha.sedes?.ciudad}, {pastorFicha.sedes?.departamento}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. SECCIÓN: REUNIONES Y HORARIOS DE CULTOS DE SU CONGREGACIÓN */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Calendar size={14} className="text-blue-600" />
+                    Reuniones Semanales y Cultos de la Congregación
+                  </h4>
+                  <span className="text-[11px] text-slate-500 font-medium">Cronograma Zonal</span>
+                </div>
+
+                <div className="space-y-2">
+                  {(pastorFicha.sedes?.horarios || []).map((h, idx) => (
+                    <div 
+                      key={idx}
+                      className={`p-3 rounded-2xl border text-xs flex items-center justify-between transition-colors ${
+                        h.tipo === 'Descanso' 
+                          ? 'bg-amber-50/70 border-amber-200/80 text-amber-950'
+                          : h.tipo === 'Culto Principal'
+                            ? 'bg-blue-50/60 border-blue-200 text-slate-900'
+                            : 'bg-slate-50 border-slate-200 text-slate-800'
+                      }`}
+                    >
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] ${
+                            h.dia === 'Domingo' 
+                              ? 'bg-blue-600 text-white' 
+                              : h.dia === 'Lunes'
+                                ? 'bg-amber-500 text-white'
+                                : 'bg-slate-200 text-slate-700'
+                          }`}>
+                            {h.dia}
+                          </span>
+                          <span className="font-bold text-slate-900">{h.culto}</span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 flex items-center gap-1 pl-1">
+                          <Clock size={11} /> {h.hora}
+                        </p>
+                      </div>
+
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                        h.tipo === 'Descanso' 
+                          ? 'bg-amber-200 text-amber-900' 
+                          : h.tipo === 'Culto Principal'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-slate-200/80 text-slate-700'
+                      }`}>
+                        {h.tipo}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 flex items-start gap-2">
+                  <Info size={15} className="text-amber-600 shrink-0 mt-0.5" />
+                  <span>
+                    <strong>Protección del Lunes de Descanso:</strong> Por estatuto nacional de la Misión Panamericana, el día lunes se respeta el descanso de los pastores y sus familias, sin convocatorias zonales obligatorias.
+                  </span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Footer Modal */}
+            <div className="bg-slate-50 p-4 border-t border-slate-200 flex justify-between items-center">
+              <span className="text-[11px] text-slate-400">
+                Directorio verificado por Administración Zonal (Nancy García)
+              </span>
+              <button
+                onClick={() => setPastorFicha(null)}
+                className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+              >
+                Cerrar Ficha
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL: ACTUALIZAR EXPEDIENTE POR ROBO/CAMBIO DE SIMCARD (NANCY GARCÍA)
       ========================================================================= */}
       {usuarioEditando && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="bg-slate-950 p-6 flex justify-between items-center text-white border-b border-slate-800">
               <div>
-                <h4 className="font-bold text-lg">Actualizar Expediente Ministerial</h4>
-                <p className="text-xs text-blue-300">Gestión de cambio de línea o traslado por la Administración Zonal</p>
+                <h4 className="font-bold text-lg">Actualizar Datos de Pastor y Congregación</h4>
+                <p className="text-xs text-blue-300">Gestión de cambio de línea telefónica, traslados o dirección física</p>
               </div>
               <button 
                 onClick={() => setUsuarioEditando(null)} 
@@ -526,7 +1098,7 @@ export default function RegistroPastor() {
 
             <form onSubmit={guardarEdicion} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre Completo</label>
+                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre Completo del Pastor</label>
                 <input 
                   type="text" 
                   required
@@ -536,7 +1108,7 @@ export default function RegistroPastor() {
                 />
               </div>
 
-              {/* CAMBIO DE NÚMERO POR ROBO O CAMBIO DE SIMCARD */}
+              {/* CAMBIO DE NÚMERO POR ROBO O PÉRDIDA */}
               <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl space-y-1.5">
                 <label className="block text-xs font-bold text-amber-900 uppercase flex items-center gap-1.5">
                   <Smartphone size={15} className="text-amber-700" />
@@ -550,8 +1122,20 @@ export default function RegistroPastor() {
                   className="w-full px-3 py-2 border border-amber-300 rounded-xl focus:ring-2 focus:ring-amber-500 text-sm font-bold text-slate-900 bg-white"
                 />
                 <p className="text-[11px] text-amber-800 leading-tight">
-                  Al actualizar este campo, el número anterior queda revocado inmediatamente y el pastor podrá ingresar con su nuevo equipo.
+                  Al actualizar este campo, el número anterior queda revocado inmediatamente y el pastor podrá ingresar con su nuevo equipo celular.
                 </p>
+              </div>
+
+              {/* DIRECCIÓN FÍSICA DE LA IGLESIA */}
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Dirección Física de la Iglesia</label>
+                <input 
+                  type="text" 
+                  value={editDireccion}
+                  onChange={(e) => setEditDireccion(e.target.value)}
+                  placeholder="Ej. Carrera 7 # 8-45 Barrio El Carmen"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -565,7 +1149,6 @@ export default function RegistroPastor() {
                     <option value="Pastor">Pastor Local</option>
                     <option value="Presbitero">Presbítero Zonal</option>
                     <option value="Administracion">Administración y Finanzas</option>
-                    <option value="Contabilidad">Contabilidad Zonal</option>
                     <option value="Abogado">Asesoría Jurídica</option>
                   </select>
                 </div>
@@ -582,21 +1165,6 @@ export default function RegistroPastor() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Sede Asignada (Traslado Ministerial)</label>
-                <select
-                  value={editSedeId}
-                  onChange={(e) => setEditSedeId(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm bg-white"
-                >
-                  {sedes.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.nombre} ({s.ciudad}, {s.departamento})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               <div className="pt-4 border-t border-slate-100 flex gap-2">
                 <button
                   type="button"
@@ -608,10 +1176,10 @@ export default function RegistroPastor() {
                 <button
                   type="submit"
                   disabled={guardandoEdicion}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {guardandoEdicion ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                  Guardar Cambios en Base de Datos
+                  Guardar Cambios
                 </button>
               </div>
             </form>

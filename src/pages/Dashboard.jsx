@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { CalendarClock, AlertTriangle, CircleDollarSign, Plus, Calendar, Trash2, CheckCircle2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CalendarClock, AlertTriangle, CircleDollarSign, Plus, Calendar, Trash2, CheckCircle2, Users, Church, ArrowRight, Smartphone } from 'lucide-react';
 import { supabase } from '../SupabaseClient';
 import { useAuth } from '../context/AuthContext';
 
@@ -217,6 +218,35 @@ export default function Dashboard() {
             {perfil?.esAdministradora ? "83% Soportes radicados en la zona" : `${porcentajeSoportes}% al día`}
           </p>
         </div>
+      </div>
+
+      {/* ACCESO DIRECTO DESTACADO AL DIRECTORIO PASTORAL Y HORARIOS */}
+      <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 rounded-3xl p-5 text-white shadow-md border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-blue-600/30 border border-blue-500/40 rounded-2xl flex items-center justify-center shrink-0">
+            <Church size={24} className="text-blue-400" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full border border-blue-500/30">
+                Directorio Ministerial Oficial
+              </span>
+            </div>
+            <h4 className="text-lg font-bold text-white mt-0.5">Directorio de Pastores, Sedes y Horarios de Culto</h4>
+            <p className="text-xs text-slate-300">
+              Busca pastores por municipio, consulta sus números de WhatsApp autorizados, direcciones y reuniones semanales.
+            </p>
+          </div>
+        </div>
+
+        <Link
+          to="/registro"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shrink-0 hover:scale-102"
+        >
+          <Users size={16} />
+          <span>Consultar Pastores y Sedes</span>
+          <ArrowRight size={15} />
+        </Link>
       </div>
 
       {/* Sección Principal de Trabajo */}

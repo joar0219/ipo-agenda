@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, CheckSquare, UserPlus, MapPin, Church, X, Compass, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, CheckSquare, Users, MapPin, Church, X, Compass, ShieldCheck } from 'lucide-react';
 
 export default function Sidebar({ usuarioActual, sidebarAbierto, setSidebarAbierto }) {
   const clasesMenu = ({ isActive }) =>
@@ -72,8 +72,8 @@ export default function Sidebar({ usuarioActual, sidebarAbierto, setSidebarAbier
           <div className="pt-4 mt-2 border-t border-slate-800">
             <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Gobernanza Zonal</p>
             <NavLink to="/registro" className={clasesMenu} onClick={cerrarMenuMovil}>
-              <UserPlus size={20} />
-              <span>Directorio y Personal</span>
+              <Users size={20} />
+              <span>Directorio Pastoral y Sedes</span>
             </NavLink>
           </div>
         </nav>
