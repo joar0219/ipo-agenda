@@ -964,15 +964,29 @@ export default function RegistroPastor() {
                     <MapPin size={14} className="text-rose-500" />
                     Ubicación y Dirección de la Congregación
                   </h4>
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pastorFicha.sedes?.nombre} ${pastorFicha.sedes?.direccion} ${pastorFicha.sedes?.ciudad}`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 hover:underline"
-                  >
-                    <span>Ver en Google Maps</span>
-                    <ExternalLink size={12} />
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        const usuarioParaEditar = pastorFicha;
+                        setPastorFicha(null);
+                        abrirEdicion(usuarioParaEditar);
+                      }}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg border border-blue-200 transition-colors cursor-pointer"
+                      title="Editar dirección física de la iglesia"
+                    >
+                      <Edit2 size={12} />
+                      <span>Corregir Dirección</span>
+                    </button>
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pastorFicha.sedes?.nombre} ${pastorFicha.sedes?.direccion} ${pastorFicha.sedes?.ciudad}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-slate-600 hover:text-slate-900 font-bold flex items-center gap-1 hover:underline"
+                    >
+                      <span>Ver en Maps</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  </div>
                 </div>
 
                 <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-2">
@@ -1062,9 +1076,17 @@ export default function RegistroPastor() {
 
             {/* Footer Modal */}
             <div className="bg-slate-50 p-4 border-t border-slate-200 flex justify-between items-center">
-              <span className="text-[11px] text-slate-400">
-                Directorio verificado por Administración Zonal (Nancy García)
-              </span>
+              <button
+                onClick={() => {
+                  const usuarioParaEditar = pastorFicha;
+                  setPastorFicha(null);
+                  abrirEdicion(usuarioParaEditar);
+                }}
+                className="px-4 py-2 bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <Edit2 size={13} />
+                <span>Corregir Dirección o Celular</span>
+              </button>
               <button
                 onClick={() => setPastorFicha(null)}
                 className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
