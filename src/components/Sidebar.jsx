@@ -34,15 +34,17 @@ export default function Sidebar({ usuarioActual, sidebarAbierto, setSidebarAbier
         {/* Encabezado Institucional */}
         <div className="p-5 flex items-center justify-between border-b border-slate-800 shrink-0">
           <div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-black text-white text-sm shadow-md">
-                IPO
+            <div className="flex items-center gap-3">
+              <img 
+                src="/logo-ipo.png" 
+                alt="Iglesia Panamericana de Occidente" 
+                className="w-10 h-10 rounded-xl object-contain bg-white p-0.5 shadow-md border border-slate-700 shrink-0" 
+              />
+              <div>
+                <span className="text-lg font-black tracking-tight text-white block leading-tight">IPO Gestión</span>
+                <span className="text-[10px] text-blue-300 font-semibold block leading-tight">Misión Panamericana</span>
               </div>
-              <span className="text-xl font-bold tracking-tight text-white">IPO Gestión</span>
             </div>
-            <p className="text-[11px] text-blue-300/80 font-medium mt-1">
-              Misión Panamericana de Colombia
-            </p>
           </div>
           <button 
             onClick={() => setSidebarAbierto(false)}

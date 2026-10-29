@@ -333,10 +333,14 @@ export default function Login({ onLoginSuccess }) {
           <button
             type="button"
             onClick={manejarToqueEscudo}
-            title="Escudo de Seguridad Institucional IPO"
-            className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-900/50 mb-3 mx-auto cursor-pointer active:scale-95 transition-transform"
+            title="Emblema Institucional IPO (5 toques para modo demostración)"
+            className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-xl shadow-blue-950/60 mb-3 mx-auto cursor-pointer active:scale-95 transition-transform p-1.5 border-2 border-slate-700/60 hover:border-blue-400 group"
           >
-            <ShieldCheck size={28} className="text-white" />
+            <img 
+              src="/logo-ipo.png" 
+              alt="Iglesia Panamericana de Occidente" 
+              className="w-full h-full object-contain rounded-2xl group-hover:scale-105 transition-transform" 
+            />
           </button>
           <h1 className="text-2xl font-black text-white tracking-tight">IPO Gestión</h1>
           <p className="text-blue-300 text-xs font-semibold mt-1">

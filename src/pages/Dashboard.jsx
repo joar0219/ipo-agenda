@@ -165,18 +165,27 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
-            Misión Panamericana de Colombia · Zona Sur-Occidente
-          </span>
-        </div>
-        <h3 className="text-2xl font-bold text-slate-800">Panel de Control General</h3>
-        <p className="text-slate-500 text-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs">
+        <div className="flex items-center gap-4">
+          <img 
+            src="/logo-ipo.png" 
+            alt="Iglesia Panamericana de Occidente" 
+            className="w-16 h-16 rounded-2xl object-contain bg-white p-1 shadow-md border border-slate-200 shrink-0" 
+          />
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                Misión Panamericana de Colombia · Zona Sur-Occidente
+              </span>
+            </div>
+            <h3 className="text-2xl font-black text-slate-800 tracking-tight">Panel de Control General</h3>
+            <p className="text-slate-500 text-xs sm:text-sm">
           {perfil?.esAdministradora 
             ? `Panel Zonal a cargo de ${perfil?.nombre_completo} (Administradora Zonal - Risaralda, Valle, Chocó)`
             : "Avance de sincronización de agendas y rendición de cuentas con la administración zonal."}
         </p>
+          </div>
+        </div>
       </div>
 
       {/* Tarjetas de Estadísticas Reales */}

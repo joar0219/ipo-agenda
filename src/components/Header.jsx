@@ -97,7 +97,7 @@ export default function Header({ usuarioActual, setSidebarAbierto }) {
           <span className="text-[11px] text-slate-400 hidden sm:block font-medium">
             {perfil?.esDominioGlobal ? 'Dominio Global Institucional' : 'Dominio Pastoral Local'}
           </span>
-          <h2 className="text-xl font-bold text-blue-600 sm:hidden">IPO</h2>
+          <img src="/logo-ipo.png" alt="Logo IPO" className="w-8 h-8 rounded-lg object-contain bg-white sm:hidden border border-slate-200" />
         </div>
 
         {/* BOTÓN EXCLUSIVO PARA EL DESARROLLADOR Y PASTOR (Alternar entre Dominio Global y Vista de Pastor Local) */}
