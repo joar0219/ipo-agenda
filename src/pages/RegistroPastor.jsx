@@ -3,7 +3,7 @@ import {
   User, MapPin, Church, Shield, UserPlus, 
   Users, Edit2, ToggleLeft, ToggleRight, Smartphone, Loader2, RefreshCw, 
   CheckCircle2, Compass, Award, X, Save, Scale, Building2, Search,
-  Calendar, Clock, ExternalLink, ChevronRight, Info, AlertTriangle, PhoneCall, KeyRound
+  Calendar, Clock, ExternalLink, ChevronRight, Info, AlertTriangle, PhoneCall, KeyRound, Plus, Trash2
 } from 'lucide-react';
 import { supabase } from '../SupabaseClient';
 import { useAuth, guardarPinLocal } from '../context/AuthContext';
@@ -1234,13 +1234,13 @@ export default function RegistroPastor() {
                 </p>
 
                 <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                  {editHorarios.map((h, idx) => (
+                  {(editHorarios || []).map((h, idx) => (
                     <div key={idx} className="p-3 bg-white border border-slate-200 rounded-xl space-y-2 shadow-2xs">
                       <div className="grid grid-cols-12 gap-2 items-center">
                         <div className="col-span-4">
                           <label className="block text-[10px] font-bold text-slate-500 uppercase">Día</label>
                           <select
-                            value={h.dia}
+                            value={h.dia || 'Domingo'}
                             onChange={(e) => actualizarHorario(idx, 'dia', e.target.value)}
                             className="w-full text-xs font-bold p-1.5 border border-slate-200 rounded-lg bg-slate-50 focus:ring-1 focus:ring-blue-500"
                           >
@@ -1257,7 +1257,7 @@ export default function RegistroPastor() {
                           <label className="block text-[10px] font-bold text-slate-500 uppercase">Horario</label>
                           <input
                             type="text"
-                            value={h.hora}
+                            value={h.hora || ''}
                             onChange={(e) => actualizarHorario(idx, 'hora', e.target.value)}
                             placeholder="Ej. 07:00 PM - 08:30 PM"
                             className="w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 font-semibold"
@@ -1284,7 +1284,7 @@ export default function RegistroPastor() {
                           <label className="block text-[10px] font-bold text-slate-500 uppercase">Nombre del Culto</label>
                           <input
                             type="text"
-                            value={h.culto}
+                            value={h.culto || ''}
                             onChange={(e) => actualizarHorario(idx, 'culto', e.target.value)}
                             placeholder="Ej. Escuela Dominical, Ayuno, Doctrina"
                             className="w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 font-medium"
@@ -1293,7 +1293,7 @@ export default function RegistroPastor() {
                         <div className="col-span-4">
                           <label className="block text-[10px] font-bold text-slate-500 uppercase">Tipo</label>
                           <select
-                            value={h.tipo}
+                            value={h.tipo || 'Culto Principal'}
                             onChange={(e) => actualizarHorario(idx, 'tipo', e.target.value)}
                             className="w-full text-[11px] font-semibold p-1.5 border border-slate-200 rounded-lg bg-slate-50 focus:ring-1 focus:ring-blue-500"
                           >
