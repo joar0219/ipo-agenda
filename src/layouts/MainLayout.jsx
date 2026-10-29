@@ -16,7 +16,7 @@ export default function MainLayout() {
     lugar: perfil?.ciudad ? `${perfil.ciudad}, ${perfil.departamento}` : "Pereira, Risaralda",
     direccion: perfil?.sede_nombre || "Presbiterio Central Pereira",
     zona: perfil?.zona || "Zona Sur-Occidente (Valle, Risaralda, Quindío, Caldas, Chocó)",
-    telefono: perfil?.telefono || user?.phone || "+57 312 456 7890",
+    telefono: perfil?.telefono || user?.phone || "+57 310 427 8831",
     esAdministradora: perfil?.esAdministradora ?? true
   };
 

@@ -35,7 +35,7 @@ El presente informe documenta el desarrollo y especificación de **tres (3) Inte
 * **Cuerpo de la Petición (Request Body - JSON):**
   ```json
   {
-    "telefono": "+573151234567",
+    "telefono": "+573113870976",
     "codigo": "748291"
   }
   ```
@@ -53,7 +53,7 @@ El presente informe documenta el desarrollo y especificación de **tres (3) Inte
       "expiraEn": 3600,
       "usuario": {
         "id": "a1b2c3d4-e5f6-7890-abcd-1234567890ef",
-        "telefono": "+573151234567",
+        "telefono": "+573113870976",
         "nombreCompleto": "José Orlando Arcila",
         "rol": "Pastor",
         "sede": "Sede Central Roldanillo",
@@ -75,7 +75,7 @@ El presente informe documenta el desarrollo y especificación de **tres (3) Inte
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"telefono": "+573151234567", "codigo": "748291"}'
+  -d '{"telefono": "+573113870976", "codigo": "748291"}'
 ```
 
 ---
@@ -101,7 +101,7 @@ curl -X POST http://localhost:3000/api/auth/login \
       {
         "id": "e4f5a6b7-8901-2345-6789-abcdef012345",
         "nombre_completo": "José Orlando Arcila",
-        "telefono": "+573151234567",
+        "telefono": "+573113870976",
         "rol": "Pastor",
         "activo": true,
         "sedes": {
@@ -114,7 +114,7 @@ curl -X POST http://localhost:3000/api/auth/login \
       {
         "id": "b8c9d0e1-2345-6789-0123-abcdef456789",
         "nombre_completo": "Gabriel González",
-        "telefono": "+573189876543",
+        "telefono": "+573108570176",
         "rol": "Presbitero",
         "activo": true,
         "sedes": {

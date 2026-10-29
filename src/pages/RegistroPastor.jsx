@@ -43,7 +43,7 @@ const DIRECTORIO_INICIAL = [
     id: 'mp-5', 
     nombre_completo: "José Orlando Arcila", 
     rol: "Pastor", 
-    telefono: "+57 315 123 4567", 
+    telefono: "+57 311 387 0976", 
     activo: true, 
     sedes: { 
       id: 'sede-roldanillo',
@@ -51,7 +51,7 @@ const DIRECTORIO_INICIAL = [
       ciudad: "Roldanillo", 
       departamento: "Valle del Cauca",
       direccion: "Carrera 7 # 8-45, Barrio El Carmen",
-      telefono_contacto: "+57 315 123 4567",
+      telefono_contacto: "+57 311 387 0976",
       zona: "Zona Sur-Occidente (Distrito Valle)",
       horarios: [
         { dia: 'Domingo', hora: '09:00 AM - 10:30 AM', culto: 'Escuela Dominical y Discipulado de Familias', tipo: 'Culto Principal' },
@@ -67,7 +67,7 @@ const DIRECTORIO_INICIAL = [
     id: 'mp-2', 
     nombre_completo: "Gabriel González", 
     rol: "Presbitero", 
-    telefono: "+57 318 987 6543", 
+    telefono: "+57 310 857 0176", 
     activo: true, 
     sedes: { 
       id: 'sede-pereira',
@@ -75,7 +75,7 @@ const DIRECTORIO_INICIAL = [
       ciudad: "Pereira", 
       departamento: "Risaralda",
       direccion: "Av. 30 de Agosto # 42-18, Sector Maraya",
-      telefono_contacto: "+57 318 987 6543",
+      telefono_contacto: "+57 310 857 0176",
       zona: "Zona Sur-Occidente (Risaralda y Junta)",
       horarios: [
         { dia: 'Domingo', hora: '09:00 AM - 11:00 AM', culto: 'Culto Central de Adoración y Santa Cena', tipo: 'Culto Principal' },
@@ -91,7 +91,7 @@ const DIRECTORIO_INICIAL = [
     id: 'mp-3', 
     nombre_completo: "Nancy García", 
     rol: "Administracion", 
-    telefono: "+57 312 456 7890", 
+    telefono: "+57 310 427 8831", 
     activo: true, 
     sedes: { 
       id: 'sede-admin',
@@ -99,7 +99,7 @@ const DIRECTORIO_INICIAL = [
       ciudad: "Pereira", 
       departamento: "Risaralda",
       direccion: "Av. Circunvalar # 12-40 Oficina 302",
-      telefono_contacto: "+57 312 456 7890",
+      telefono_contacto: "+57 310 427 8831",
       zona: "Sede Administrativa y Financiera (Zona Sur-Occidente)",
       horarios: [
         { dia: 'Lunes a Viernes', hora: '08:00 AM - 05:00 PM', culto: 'Atención Administrativa, Contable y Auditoría', tipo: 'Administración' },
@@ -111,7 +111,7 @@ const DIRECTORIO_INICIAL = [
     id: 'mp-4', 
     nombre_completo: "Dra. Elizabeth Nieto", 
     rol: "Abogado", 
-    telefono: "+57 310 999 8888", 
+    telefono: "+57 312 747 6470", 
     activo: true, 
     sedes: { 
       id: 'sede-juridica',
@@ -119,7 +119,7 @@ const DIRECTORIO_INICIAL = [
       ciudad: "Pereira", 
       departamento: "Risaralda",
       direccion: "Cra 7 # 19-28 Edificio Banco Ganadero Of. 504",
-      telefono_contacto: "+57 310 999 8888",
+      telefono_contacto: "+57 312 747 6470",
       zona: "Sede Jurídica Territorial y Nacional",
       horarios: [
         { dia: 'Lunes a Jueves', hora: '08:00 AM - 04:00 PM', culto: 'Consultoría Estatutaria, Personerías y Notarial', tipo: 'Jurídica' }
@@ -130,7 +130,7 @@ const DIRECTORIO_INICIAL = [
     id: 'mp-1', 
     nombre_completo: "Armando Arboleda", 
     rol: "Presidente Nacional", 
-    telefono: "+57 300 111 2233", 
+    telefono: "+57 321 643 3191", 
     activo: true, 
     sedes: { 
       id: 'sede-nacional',
@@ -138,7 +138,7 @@ const DIRECTORIO_INICIAL = [
       ciudad: "Bogotá D.C.", 
       departamento: "Cundinamarca",
       direccion: "Carrera 13 # 63-39 Chapinero",
-      telefono_contacto: "+57 300 111 2233",
+      telefono_contacto: "+57 321 643 3191",
       zona: "Dirección Nacional (Misión Panamericana de Colombia)",
       horarios: [
         { dia: 'Domingo', hora: '10:00 AM - 12:30 PM', culto: 'Culto Solemne Nacional de Alabanza y Adoración', tipo: 'Culto Principal' },
@@ -795,7 +795,7 @@ export default function RegistroPastor() {
                   required 
                   value={telefono}
                   onChange={(e) => setTelefono(e.target.value)}
-                  placeholder="Ej. 315 123 4567" 
+                  placeholder="Ej. 311 387 0976" 
                   className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm font-bold text-slate-800" 
                 />
               </div>

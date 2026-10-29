@@ -190,20 +190,20 @@ DELETE FROM public.sedes WHERE nombre IN (
 
 INSERT INTO public.sedes (nombre, ciudad, departamento, zona, direccion, telefono_contacto, tipo)
 VALUES 
-    ('Sede Central Roldanillo', 'Roldanillo', 'Valle del Cauca', 'Zona Sur-Occidente', 'Carrera 7 # 8-45, Barrio El Carmen', '+57 315 123 4567', 'Local'),
-    ('Presbiterio Central Pereira', 'Pereira', 'Risaralda', 'Zona Sur-Occidente', 'Av. 30 de Agosto # 42-18, Sector Maraya', '+57 318 987 6543', 'Presbiterio_Zonal'),
-    ('Administración Zonal Sur-Occidente', 'Pereira', 'Risaralda', 'Zona Sur-Occidente', 'Av. Circunvalar # 12-40 Oficina 302', '+57 312 456 7890', 'Presbiterio_Zonal'),
-    ('Sede Nacional Misión Panamericana', 'Bogotá D.C.', 'Cundinamarca', 'Nacional', 'Carrera 13 # 63-39 Chapinero', '+57 300 111 2233', 'Sede_Nacional')
+    ('Sede Central Roldanillo', 'Roldanillo', 'Valle del Cauca', 'Zona Sur-Occidente', 'Carrera 7 # 8-45, Barrio El Carmen', '+57 311 387 0976', 'Local'),
+    ('Presbiterio Central Pereira', 'Pereira', 'Risaralda', 'Zona Sur-Occidente', 'Av. 30 de Agosto # 42-18, Sector Maraya', '+57 310 857 0176', 'Presbiterio_Zonal'),
+    ('Administración Zonal Sur-Occidente', 'Pereira', 'Risaralda', 'Zona Sur-Occidente', 'Av. Circunvalar # 12-40 Oficina 302', '+57 310 427 8831', 'Presbiterio_Zonal'),
+    ('Sede Nacional Misión Panamericana', 'Bogotá D.C.', 'Cundinamarca', 'Nacional', 'Carrera 13 # 63-39 Chapinero', '+57 321 643 3191', 'Sede_Nacional')
 ON CONFLICT DO NOTHING;
 
 -- Personal Oficial Registrado (con PIN personal asignado)
 INSERT INTO public.perfiles (nombre_completo, telefono, rol, pin_acceso, requiere_cambio_pin, activo, notas)
 VALUES 
-    ('José Orlando Arcila', '+57 315 123 4567', 'Pastor', '234567', false, true, 'Pastor Titular Sede Central Roldanillo · Desarrollador y Administrador General del Sistema'),
-    ('Nancy García', '+57 312 456 7890', 'Administracion', '456789', false, true, 'Encargada de Administración Zonal y Contabilidad (Dominio Global)'),
-    ('Gabriel González', '+57 318 987 6543', 'Presbitero', '876543', false, true, 'Presbítero Principal y Miembro de Junta Directiva (Dominio Global)'),
-    ('Dra. Elizabeth Nieto', '+57 310 999 8888', 'Abogado', '998888', false, true, 'Dirección de Asesoría Jurídica y Notarial (Dominio Global)'),
-    ('Armando Arboleda', '+57 300 111 2233', 'Presidente Nacional', '112233', false, true, 'Presidente General Misión Panamericana de Colombia (Dominio Global)')
+    ('José Orlando Arcila', '+57 311 387 0976', 'Pastor', '387097', false, true, 'Pastor Titular Sede Central Roldanillo · Desarrollador y Administrador General del Sistema'),
+    ('Nancy García', '+57 310 427 8831', 'Administracion', '427883', false, true, 'Encargada de Administración Zonal y Contabilidad (Dominio Global)'),
+    ('Gabriel González', '+57 310 857 0176', 'Presbitero', '857017', false, true, 'Presbítero Principal y Miembro de Junta Directiva (Dominio Global)'),
+    ('Dra. Elizabeth Nieto', '+57 312 747 6470', 'Abogado', '747647', false, true, 'Dirección de Asesoría Jurídica y Notarial (Dominio Global)'),
+    ('Armando Arboleda', '+57 321 643 3191', 'Presidente Nacional', '643319', false, true, 'Presidente General Misión Panamericana de Colombia (Dominio Global)')
 ON CONFLICT (telefono) DO UPDATE SET 
     nombre_completo = EXCLUDED.nombre_completo,
     rol = EXCLUDED.rol,

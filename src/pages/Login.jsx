@@ -314,7 +314,7 @@ export default function Login({ onLoginSuccess }) {
 
   // Enlace directo al WhatsApp de Nancy García para restablecimiento de PIN o cambio de línea
   const obtenerEnlaceSoporteNancy = () => {
-    const numNancy = '573124567890';
+    const numNancy = '573104278831';
     const nombre = usuarioDetectado?.nombre_completo || 'Pastor / Ministro';
     const tel = telefono || usuarioDetectado?.telefono || '';
     const texto = `Paz de Cristo hermana Nancy García (Administración Zonal). Solicito apoyo para restablecer mi PIN de acceso en la plataforma IPO Gestión. Nombre: ${nombre} - Línea: ${tel}.`;
@@ -384,7 +384,7 @@ export default function Login({ onLoginSuccess }) {
                       type="tel"
                       required
                       autoFocus
-                      placeholder="315 123 4567"
+                      placeholder="311 387 0976"
                       value={telefono}
                       onChange={(e) => setTelefono(e.target.value)}
                       className="w-full pl-14 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none font-bold text-slate-800 text-base tracking-wide"
@@ -463,10 +463,10 @@ export default function Login({ onLoginSuccess }) {
                     >
                       <span className="flex items-center gap-2">
                         <Building2 size={14} className="text-amber-700" />
-                        Nancy García (312 456 7890)
+                        Nancy García (310 427 8831)
                       </span>
                       <span className="text-[10px] bg-amber-100 px-2 py-0.5 rounded-full font-bold text-amber-900">
-                        PIN: 456789
+                        PIN: 427883
                       </span>
                     </button>
 
@@ -477,10 +477,10 @@ export default function Login({ onLoginSuccess }) {
                     >
                       <span className="flex items-center gap-2">
                         <Scale size={14} className="text-purple-700" />
-                        Dra. Elizabeth Nieto (310 999 8888)
+                        Dra. Elizabeth Nieto (312 747 6470)
                       </span>
                       <span className="text-[10px] bg-purple-100 px-2 py-0.5 rounded-full font-bold text-purple-900">
-                        PIN: 998888
+                        PIN: 747647
                       </span>
                     </button>
 
@@ -491,10 +491,10 @@ export default function Login({ onLoginSuccess }) {
                     >
                       <span className="flex items-center gap-2">
                         <Church size={14} className="text-blue-700" />
-                        Gabriel González (318 987 6543)
+                        Gabriel González (310 857 0176)
                       </span>
                       <span className="text-[10px] bg-blue-100 px-2 py-0.5 rounded-full font-bold text-blue-900">
-                        PIN: 876543
+                        PIN: 857017
                       </span>
                     </button>
 
@@ -505,10 +505,10 @@ export default function Login({ onLoginSuccess }) {
                     >
                       <span className="flex items-center gap-2">
                         <UserCheck size={14} className="text-emerald-700" />
-                        Pastor José Arcila (315 123 4567)
+                        Pastor José Arcila (311 387 0976)
                       </span>
                       <span className="text-[10px] bg-emerald-100 px-2 py-0.5 rounded-full font-bold text-emerald-900">
-                        PIN: 234567
+                        PIN: 387097
                       </span>
                     </button>
                   </div>

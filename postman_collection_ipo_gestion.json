@@ -15,7 +15,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"telefono\": \"+573151234567\",\n  \"codigo\": \"748291\"\n}"
+          "raw": "{\n  \"telefono\": \"+573113870976\",\n  \"codigo\": \"748291\"\n}"
         },
         "url": {
           "raw": "http://localhost:3000/api/auth/login",

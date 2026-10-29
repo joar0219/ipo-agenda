@@ -19,8 +19,8 @@ export const PERFILES_INSTITUCIONALES = [
     ciudad: 'Roldanillo',
     departamento: 'Valle del Cauca',
     zona: 'Zona Sur-Occidente (Dominio Global y Pastoral)',
-    telefono: '+57 315 123 4567',
-    pin_acceso: '234567',
+    telefono: '+57 311 387 0976',
+    pin_acceso: '387097',
     requiere_cambio_pin: false,
     modulo: 'SuperAdmin y Pastoral',
     esAdministradora: true,
@@ -38,8 +38,8 @@ export const PERFILES_INSTITUCIONALES = [
     ciudad: 'Pereira',
     departamento: 'Risaralda',
     zona: 'Zona Sur-Occidente (Dominio Global)',
-    telefono: '+57 312 456 7890',
-    pin_acceso: '456789',
+    telefono: '+57 310 427 8831',
+    pin_acceso: '427883',
     requiere_cambio_pin: false,
     modulo: 'Contable y Financiero',
     esAdministradora: true,
@@ -57,8 +57,8 @@ export const PERFILES_INSTITUCIONALES = [
     ciudad: 'Pereira',
     departamento: 'Risaralda',
     zona: 'Zona Sur-Occidente y Junta Directiva (Dominio Global)',
-    telefono: '+57 318 987 6543',
-    pin_acceso: '876543',
+    telefono: '+57 310 857 0176',
+    pin_acceso: '857017',
     requiere_cambio_pin: false,
     modulo: 'Eclesiástico y Pastoral',
     esAdministradora: true,
@@ -76,8 +76,8 @@ export const PERFILES_INSTITUCIONALES = [
     ciudad: 'Pereira',
     departamento: 'Risaralda',
     zona: 'Zona Sur-Occidente y Nacional (Dominio Global)',
-    telefono: '+57 310 999 8888',
-    pin_acceso: '998888',
+    telefono: '+57 312 747 6470',
+    pin_acceso: '747647',
     requiere_cambio_pin: false,
     modulo: 'Jurídico y Notarial',
     esAdministradora: true,
@@ -95,8 +95,8 @@ export const PERFILES_INSTITUCIONALES = [
     ciudad: 'Bogotá D.C.',
     departamento: 'Cundinamarca',
     zona: 'Nacional (Dominio Global)',
-    telefono: '+57 300 111 2233',
-    pin_acceso: '112233',
+    telefono: '+57 321 643 3191',
+    pin_acceso: '643319',
     requiere_cambio_pin: false,
     modulo: 'Gobierno General',
     esAdministradora: true,
@@ -153,7 +153,7 @@ export function normalizarPerfilInstitucional(data) {
 
   // Si es José Orlando Arcila (Desarrollador y Pastor), tiene rango de SuperAdmin y Dominio Global
   const esDesarrolladorPastor =
-    soloDigitos === '3151234567' ||
+    soloDigitos === '3113870976' ||
     (data.nombre_completo || '').toLowerCase().includes('orlando arcila') ||
     Boolean(data.esSuperAdmin);
 

@@ -32,7 +32,7 @@ async function ejecutarPruebas() {
     console.log('   Respuesta recibida:', JSON.stringify(dataCrear, null, 2));
 
     const nuevoId = dataCrear?.data?.id || "e4f5a6b7-8901-2345-6789-abcdef012345";
-    const telefonoPrueba = dataCrear?.data?.telefono || "+573151234567";
+    const telefonoPrueba = dataCrear?.data?.telefono || "+573113870976";
 
     // -----------------------------------------------------------------------
     // PRUEBA 2: API 1 - POST /api/auth/login (Autenticación - Pantalla 2 Login)

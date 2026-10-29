@@ -38,7 +38,7 @@ let usuariosMemoria = [
   {
     id: "e4f5a6b7-8901-2345-6789-abcdef012345",
     nombre_completo: "José Orlando Arcila",
-    telefono: "+573151234567",
+    telefono: "+573113870976",
     rol: "Pastor",
     activo: true,
     sedes: { nombre: "Sede Central Roldanillo", ciudad: "Roldanillo", departamento: "Valle del Cauca" }
@@ -46,7 +46,7 @@ let usuariosMemoria = [
   {
     id: "b8c9d0e1-2345-6789-0123-abcdef456789",
     nombre_completo: "Gabriel González",
-    telefono: "+573189876543",
+    telefono: "+573108570176",
     rol: "Presbitero",
     activo: true,
     sedes: { nombre: "Presbiterio Central Pereira", ciudad: "Pereira", departamento: "Risaralda" }
