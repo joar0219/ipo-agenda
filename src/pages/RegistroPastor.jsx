@@ -3,9 +3,10 @@ import {
   User, MapPin, Church, Shield, UserPlus, 
   Users, Edit2, ToggleLeft, ToggleRight, Smartphone, Loader2, RefreshCw, 
   CheckCircle2, Compass, Award, X, Save, Scale, Building2, Search,
-  Calendar, Clock, ExternalLink, ChevronRight, Info, AlertTriangle, PhoneCall
+  Calendar, Clock, ExternalLink, ChevronRight, Info, AlertTriangle, PhoneCall, KeyRound
 } from 'lucide-react';
 import { supabase } from '../SupabaseClient';
+import { useAuth, guardarPinLocal } from '../context/AuthContext';
 
 // Icono oficial de WhatsApp estilizado
 const IconWhatsApp = ({ size = 18, className = "" }) => (
@@ -21,7 +22,22 @@ const IconWhatsApp = ({ size = 18, className = "" }) => (
   </svg>
 );
 
-// Directorio Ministerial Oficial con Sedes, Direcciones y Horarios de Cultos
+// Directorio Ministerial Oficial con los 5 Perfiles Reales (Sin registros ficticios)
+const NOMBRES_FICTICIOS_EXCLUIDOS = [
+  'wilson mosquera palacios',
+  'wilson mosquera',
+  'carlos arturo ramírez',
+  'carlos arturo ramirez',
+  'fernando morales echeverry',
+  'héctor fabio caicedo',
+  'hector fabio caicedo',
+  'andrés ruiz',
+  'manuel ortiz',
+  'david echeverri',
+  'pastor daniel estudiante',
+  'pastor carlos gómez'
+];
+
 const DIRECTORIO_INICIAL = [
   { 
     id: 'mp-5', 
@@ -67,102 +83,6 @@ const DIRECTORIO_INICIAL = [
         { dia: 'Miércoles', hora: '07:00 PM - 08:30 PM', culto: 'Escuela Bíblica de Liderazgo y Teología Práctica', tipo: 'Enseñanza' },
         { dia: 'Viernes', hora: '09:00 AM - 12:00 PM', culto: 'Vigilia de Ayuno e Intercesión por Pastores Zonales', tipo: 'Oración' },
         { dia: 'Sábado', hora: '06:00 PM - 08:00 PM', culto: 'Culto Juvenil Panamericano', tipo: 'Ministerios' },
-        { dia: 'Lunes', hora: 'Todo el día', culto: 'Descanso Ministerial Pastoral (Institucional IPO)', tipo: 'Descanso' }
-      ]
-    } 
-  },
-  { 
-    id: 'mp-6', 
-    nombre_completo: "Wilson Mosquera Palacios", 
-    rol: "Pastor", 
-    telefono: "+57 311 555 4321", 
-    activo: true, 
-    sedes: { 
-      id: 'sede-quibdo',
-      nombre: "Iglesia Panamericana Central Quibdó", 
-      ciudad: "Quibdó", 
-      departamento: "Chocó",
-      direccion: "Calle 26 # 4-50, Barrio Alameda",
-      telefono_contacto: "+57 311 555 4321",
-      zona: "Zona Sur-Occidente (Distrito Chocó)",
-      horarios: [
-        { dia: 'Domingo', hora: '09:30 AM - 11:30 AM', culto: 'Escuela Dominical y Culto de Gratitud', tipo: 'Culto Principal' },
-        { dia: 'Domingo', hora: '06:30 PM - 08:15 PM', culto: 'Culto General de Alabanza y Avivamiento', tipo: 'Culto Principal' },
-        { dia: 'Miércoles', hora: '07:00 PM - 08:30 PM', culto: 'Servicio Doctrinal y Hogares de Paz', tipo: 'Enseñanza' },
-        { dia: 'Viernes', hora: '09:00 AM - 11:30 AM', culto: 'Ayuno Zonal y Clamor por el Departamento del Chocó', tipo: 'Oración' },
-        { dia: 'Sábado', hora: '06:00 PM - 07:30 PM', culto: 'Culto de Jóvenes y Conquistadores de Cristo', tipo: 'Ministerios' },
-        { dia: 'Lunes', hora: 'Todo el día', culto: 'Descanso Ministerial Pastoral (Institucional IPO)', tipo: 'Descanso' }
-      ]
-    } 
-  },
-  { 
-    id: 'mp-7', 
-    nombre_completo: "Carlos Arturo Ramírez", 
-    rol: "Pastor", 
-    telefono: "+57 316 789 0123", 
-    activo: true, 
-    sedes: { 
-      id: 'sede-armenia',
-      nombre: "Iglesia Panamericana Armenia Centro", 
-      ciudad: "Armenia", 
-      departamento: "Quindío",
-      direccion: "Carrera 14 # 21-30, Barrio Galán",
-      telefono_contacto: "+57 316 789 0123",
-      zona: "Zona Sur-Occidente (Distrito Quindío)",
-      horarios: [
-        { dia: 'Domingo', hora: '09:00 AM - 10:30 AM', culto: 'Escuela Dominical y Formación Infantil', tipo: 'Culto Principal' },
-        { dia: 'Domingo', hora: '06:00 PM - 07:45 PM', culto: 'Culto de Alabanza, Adoración y Mensaje', tipo: 'Culto Principal' },
-        { dia: 'Miércoles', hora: '07:00 PM - 08:30 PM', culto: 'Estudio Bíblico Expositivo y Doctrina', tipo: 'Enseñanza' },
-        { dia: 'Viernes', hora: '09:00 AM - 11:00 AM', culto: 'Mañana de Ayuno, Oración y Liberación', tipo: 'Oración' },
-        { dia: 'Sábado', hora: '06:30 PM - 08:00 PM', culto: 'Sociedades Juveniles y Matrimonios', tipo: 'Ministerios' },
-        { dia: 'Lunes', hora: 'Todo el día', culto: 'Descanso Ministerial Pastoral (Institucional IPO)', tipo: 'Descanso' }
-      ]
-    } 
-  },
-  { 
-    id: 'mp-8', 
-    nombre_completo: "Fernando Morales Echeverry", 
-    rol: "Pastor", 
-    telefono: "+57 317 444 9876", 
-    activo: true, 
-    sedes: { 
-      id: 'sede-manizales',
-      nombre: "Iglesia Panamericana Manizales", 
-      ciudad: "Manizales", 
-      departamento: "Caldas",
-      direccion: "Calle 22 # 24-12, Sector Centro Histórico",
-      telefono_contacto: "+57 317 444 9876",
-      zona: "Zona Sur-Occidente (Distrito Caldas)",
-      horarios: [
-        { dia: 'Domingo', hora: '10:00 AM - 12:00 PM', culto: 'Culto General Dominical y Escuela Bíblica', tipo: 'Culto Principal' },
-        { dia: 'Domingo', hora: '06:00 PM - 07:30 PM', culto: 'Culto Evangelístico de la Esperanza', tipo: 'Culto Principal' },
-        { dia: 'Miércoles', hora: '07:00 PM - 08:30 PM', culto: 'Doctrina de la Gracia y Discipulado', tipo: 'Enseñanza' },
-        { dia: 'Viernes', hora: '09:00 AM - 11:30 AM', culto: 'Ayuno Congregacional y Clamor', tipo: 'Oración' },
-        { dia: 'Sábado', hora: '06:30 PM - 08:00 PM', culto: 'Juventud Panamericana y Familia', tipo: 'Ministerios' },
-        { dia: 'Lunes', hora: 'Todo el día', culto: 'Descanso Ministerial Pastoral (Institucional IPO)', tipo: 'Descanso' }
-      ]
-    } 
-  },
-  { 
-    id: 'mp-9', 
-    nombre_completo: "Héctor Fabio Caicedo", 
-    rol: "Pastor", 
-    telefono: "+57 313 888 2345", 
-    activo: true, 
-    sedes: { 
-      id: 'sede-cartago',
-      nombre: "Iglesia Panamericana Cartago", 
-      ciudad: "Cartago", 
-      departamento: "Valle del Cauca",
-      direccion: "Carrera 4 # 11-20, Barrio El Carmen",
-      telefono_contacto: "+57 313 888 2345",
-      zona: "Zona Sur-Occidente (Norte del Valle)",
-      horarios: [
-        { dia: 'Domingo', hora: '09:00 AM - 10:30 AM', culto: 'Escuela Bíblica Dominical', tipo: 'Culto Principal' },
-        { dia: 'Domingo', hora: '06:00 PM - 07:45 PM', culto: 'Culto Solemne de Adoración y Alabanza', tipo: 'Culto Principal' },
-        { dia: 'Miércoles', hora: '07:00 PM - 08:30 PM', culto: 'Enseñanza Doctrinal y Hogares', tipo: 'Enseñanza' },
-        { dia: 'Viernes', hora: '09:00 AM - 11:30 AM', culto: 'Ayuno y Clamor Intercesor', tipo: 'Oración' },
-        { dia: 'Sábado', hora: '06:30 PM - 08:00 PM', culto: 'Culto de Jóvenes y Damas Dorcas', tipo: 'Ministerios' },
         { dia: 'Lunes', hora: 'Todo el día', culto: 'Descanso Ministerial Pastoral (Institucional IPO)', tipo: 'Descanso' }
       ]
     } 
@@ -229,6 +149,7 @@ const DIRECTORIO_INICIAL = [
 ];
 
 export default function RegistroPastor() {
+  const { perfil } = useAuth();
   const [pestanaActiva, setPestanaActiva] = useState('lista');
   const [usuarios, setUsuarios] = useState(DIRECTORIO_INICIAL);
   const [sedes, setSedes] = useState([]);
@@ -247,15 +168,17 @@ export default function RegistroPastor() {
   // Estados del formulario de nuevo registro
   const [nombreCompleto, setNombreCompleto] = useState('');
   const [telefono, setTelefono] = useState('');
+  const [pinInicial, setPinInicial] = useState('');
   const [rolSeleccionado, setRolSeleccionado] = useState('Pastor');
   const [sedeSeleccionada, setSedeSeleccionada] = useState('');
   const [departamento, setDepartamento] = useState('Valle del Cauca');
   const [direccionNueva, setDireccionNueva] = useState('');
 
-  // Estados para el Modal de Edición (Cambio de teléfono / pérdida de celular)
+  // Estados para el Modal de Edición (Cambio de teléfono / pérdida de celular / PIN)
   const [usuarioEditando, setUsuarioEditando] = useState(null);
   const [editNombre, setEditNombre] = useState('');
   const [editTelefono, setEditTelefono] = useState('');
+  const [editPin, setEditPin] = useState('');
   const [editRol, setEditRol] = useState('Pastor');
   const [editDireccion, setEditDireccion] = useState('');
   const [editActivo, setEditActivo] = useState(true);
@@ -299,20 +222,28 @@ export default function RegistroPastor() {
         .order('nombre_completo', { ascending: true });
 
       if (!error && data && data.length > 0) {
-        // Enriquecer registros de BD con los horarios estándar de la congregación si faltan
-        const datosCompletos = data.map((u, i) => {
-          const plantillaFallback = DIRECTORIO_INICIAL.find(p => p.nombre_completo.toLowerCase() === u.nombre_completo.toLowerCase()) || DIRECTORIO_INICIAL[0];
-          return {
-            ...u,
-            sedes: {
-              ...plantillaFallback.sedes,
-              ...(u.sedes || {}),
-              direccion: u.sedes?.direccion || plantillaFallback.sedes?.direccion || 'Calle Principal Centro',
-              horarios: plantillaFallback.sedes?.horarios || []
-            }
-          };
-        });
-        setUsuarios(datosCompletos);
+        // Filtrar cualquier registro ficticio antiguo y enriquecer registros reales con los horarios de culto
+        const reales = data.filter(
+          u => !NOMBRES_FICTICIOS_EXCLUIDOS.includes((u.nombre_completo || '').toLowerCase().trim())
+        );
+
+        if (reales.length > 0) {
+          const datosCompletos = reales.map((u) => {
+            const plantillaFallback = DIRECTORIO_INICIAL.find(p => p.nombre_completo.toLowerCase() === u.nombre_completo.toLowerCase()) || DIRECTORIO_INICIAL[0];
+            return {
+              ...u,
+              sedes: {
+                ...plantillaFallback.sedes,
+                ...(u.sedes || {}),
+                direccion: u.sedes?.direccion || plantillaFallback.sedes?.direccion || 'Calle Principal Centro',
+                horarios: u.sedes?.horarios || plantillaFallback.sedes?.horarios || []
+              }
+            };
+          });
+          setUsuarios(datosCompletos);
+        } else {
+          setUsuarios(DIRECTORIO_INICIAL);
+        }
       } else {
         setUsuarios(DIRECTORIO_INICIAL);
       }
@@ -353,6 +284,7 @@ export default function RegistroPastor() {
     setUsuarioEditando(u);
     setEditNombre(u.nombre_completo);
     setEditTelefono(u.telefono || '');
+    setEditPin('');
     setEditRol(u.rol);
     setEditDireccion(u.sedes?.direccion || '');
     setEditActivo(u.activo);
@@ -365,17 +297,28 @@ export default function RegistroPastor() {
     setGuardandoEdicion(true);
     try {
       const numNormalizado = editTelefono.startsWith('+') ? editTelefono : `+57 ${editTelefono.replace(/\D/g, '')}`;
+      const pinLimpio = editPin.replace(/\D/g, '').slice(0, 6);
+
+      if (pinLimpio && pinLimpio.length === 6) {
+        // Si es 123456 forzamos que el pastor cree su propio PIN al entrar
+        guardarPinLocal(numNormalizado, pinLimpio, pinLimpio === '123456');
+      }
 
       if (!usuarioEditando.id.startsWith('mp-')) {
+        const camposUpdate = {
+          nombre_completo: editNombre,
+          telefono: numNormalizado,
+          rol: editRol,
+          activo: editActivo,
+          updated_at: new Date().toISOString()
+        };
+        if (pinLimpio && pinLimpio.length === 6) {
+          camposUpdate.pin_acceso = pinLimpio;
+          camposUpdate.requiere_cambio_pin = pinLimpio === '123456';
+        }
         await supabase
           .from('perfiles')
-          .update({
-            nombre_completo: editNombre,
-            telefono: numNormalizado,
-            rol: editRol,
-            activo: editActivo,
-            updated_at: new Date().toISOString()
-          })
+          .update(camposUpdate)
           .eq('id', usuarioEditando.id);
       }
 
@@ -396,7 +339,10 @@ export default function RegistroPastor() {
         return u;
       }));
 
-      alert(`¡Expediente de ${editNombre} actualizado exitosamente!\n\nNueva línea autorizada: ${numNormalizado}`);
+      const msgPin = (pinLimpio && pinLimpio.length === 6)
+        ? `\nPIN actualizado a: ${pinLimpio}${pinLimpio === '123456' ? ' (se le pedirá crear uno personal en su próximo ingreso)' : ''}`
+        : '';
+      alert(`¡Expediente de ${editNombre} actualizado exitosamente!\n\nNueva línea autorizada: ${numNormalizado}${msgPin}`);
       setUsuarioEditando(null);
     } catch (error) {
       alert('Error actualizando expediente: ' + error.message);
@@ -426,12 +372,20 @@ export default function RegistroPastor() {
     setGuardando(true);
     try {
       const numeroFormateado = telefono.startsWith('+') ? telefono : `+57 ${telefono.replace(/\D/g, '')}`;
+      const pinAsignado = (pinInicial.replace(/\D/g, '').length === 6)
+        ? pinInicial.replace(/\D/g, '')
+        : '123456';
+      const exigirCambio = pinAsignado === '123456';
+
+      guardarPinLocal(numeroFormateado, pinAsignado, exigirCambio);
 
       const nuevoUsuario = {
         id: `usr-${Date.now()}`,
         nombre_completo: nombreCompleto,
         telefono: numeroFormateado,
         rol: rolSeleccionado,
+        pin_acceso: pinAsignado,
+        requiere_cambio_pin: exigirCambio,
         activo: true,
         sedes: {
           id: `sede-${Date.now()}`,
@@ -457,6 +411,8 @@ export default function RegistroPastor() {
           nombre_completo: nombreCompleto,
           telefono: numeroFormateado,
           rol: rolSeleccionado,
+          pin_acceso: pinAsignado,
+          requiere_cambio_pin: exigirCambio,
           activo: true
         }]);
       } catch (errDb) {
@@ -467,6 +423,7 @@ export default function RegistroPastor() {
       setMensajeExito(true);
       setNombreCompleto('');
       setTelefono('');
+      setPinInicial('');
       setDireccionNueva('');
 
       setTimeout(() => {
@@ -545,17 +502,19 @@ export default function RegistroPastor() {
               <Users size={15} />
               <span>Directorio ({usuarios.length})</span>
             </button>
-            <button
-              onClick={() => setPestanaActiva('registro')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                pestanaActiva === 'registro' 
-                  ? 'bg-white text-slate-900 shadow-sm' 
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <UserPlus size={15} />
-              <span>Inscribir en Censo</span>
-            </button>
+            {perfil?.esDominioGlobal && (
+              <button
+                onClick={() => setPestanaActiva('registro')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  pestanaActiva === 'registro' 
+                    ? 'bg-white text-slate-900 shadow-sm' 
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <UserPlus size={15} />
+                <span>Inscribir en Censo</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -743,27 +702,31 @@ export default function RegistroPastor() {
                           </button>
                         </td>
 
-                        {/* 6. Acciones: Actualizar Línea / Suspender */}
+                        {/* 6. Acciones: Actualizar Línea / Suspender (Solo Dominio Global o el propio Pastor en su sede) */}
                         <td className="p-4 text-right pr-6 space-x-1">
-                          <button 
-                            onClick={() => abrirEdicion(usuario)}
-                            className="inline-flex p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
-                            title="Editar línea telefónica o dirección física (Nancy García)"
-                          >
-                            <Edit2 size={16} />
-                          </button>
+                          {(perfil?.esDominioGlobal || usuario.telefono?.replace(/\D/g, '').slice(-10) === perfil?.telefono?.replace(/\D/g, '').slice(-10)) && (
+                            <button 
+                              onClick={() => abrirEdicion(usuario)}
+                              className="inline-flex p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                              title="Editar información de sede o línea telefónica"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                          )}
 
-                          <button 
-                            onClick={() => alternarEstado(usuario.id, usuario.activo)}
-                            className={`inline-flex p-2 rounded-xl transition-colors ${
-                              usuario.activo 
-                                ? 'text-slate-400 hover:text-rose-600 hover:bg-rose-50' 
-                                : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'
-                            }`}
-                            title={usuario.activo ? "Suspender acceso" : "Reactivar acceso"}
-                          >
-                            {usuario.activo ? <ToggleRight size={22} className="text-emerald-500" /> : <ToggleLeft size={22} />}
-                          </button>
+                          {perfil?.esDominioGlobal && (
+                            <button 
+                              onClick={() => alternarEstado(usuario.id, usuario.activo)}
+                              className={`inline-flex p-2 rounded-xl transition-colors ${
+                                usuario.activo 
+                                  ? 'text-slate-400 hover:text-rose-600 hover:bg-rose-50' 
+                                  : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'
+                              }`}
+                              title={usuario.activo ? "Suspender acceso" : "Reactivar acceso"}
+                            >
+                              {usuario.activo ? <ToggleRight size={22} className="text-emerald-500" /> : <ToggleLeft size={22} />}
+                            </button>
+                          )}
                         </td>
 
                       </tr>
@@ -851,7 +814,7 @@ export default function RegistroPastor() {
                 </div>
               </div>
 
-              <div className="space-y-1 md:col-span-2">
+              <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-600 uppercase">Cargo / Rol Eclesiástico</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Shield size={16} /></div>
@@ -866,6 +829,25 @@ export default function RegistroPastor() {
                     <option value="Abogado">Asesoría Jurídica y Notarial (Dra. Elizabeth Nieto)</option>
                   </select>
                 </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-600 uppercase flex items-center gap-1">
+                  <KeyRound size={14} className="text-blue-600" />
+                  PIN Inicial de Acceso (6 dígitos)
+                </label>
+                <input 
+                  type="text" 
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={pinInicial}
+                  onChange={(e) => setPinInicial(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="Por defecto: 123456 (Temporal)" 
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm font-bold text-slate-800" 
+                />
+                <p className="text-[10px] text-slate-400">
+                  Si lo dejas vacío o en 123456, el sistema le pedirá crear su PIN secreto al entrar por primera vez.
+                </p>
               </div>
 
             </div>
@@ -1158,6 +1140,35 @@ export default function RegistroPastor() {
                   placeholder="Ej. Carrera 7 # 8-45 Barrio El Carmen"
                   className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm font-medium"
                 />
+              </div>
+
+              {/* RESTABLECIMIENTO DE PIN DE SEGURIDAD */}
+              <div className="p-3.5 bg-blue-50/70 border border-blue-200 rounded-2xl space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-blue-950 uppercase flex items-center gap-1.5">
+                    <KeyRound size={14} className="text-blue-700" />
+                    Restablecer PIN de Acceso (Opcional)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setEditPin('123456')}
+                    className="text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Asignar Temporal (123456)
+                  </button>
+                </div>
+                <input 
+                  type="text" 
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={editPin}
+                  onChange={(e) => setEditPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="Dejar en blanco para conservar el PIN actual"
+                  className="w-full px-3 py-2 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm font-bold text-slate-900 bg-white"
+                />
+                <p className="text-[11px] text-blue-800 leading-tight">
+                  Si asignas <strong>123456</strong>, el pastor deberá crear su propio PIN personal de 6 dígitos en su próximo ingreso.
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

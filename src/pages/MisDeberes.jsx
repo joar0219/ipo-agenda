@@ -42,7 +42,7 @@ export default function MisDeberes() {
   // Filtro de departamento para la auditoría de la Zona Sur-Occidente
   const [filtroDpto, setFiltroDpto] = useState('Todos');
 
-  // Datos reales y consolidados de auditoría para la Zona Sur-Occidente
+  // Datos reales de auditoría para las sedes oficiales registradas (Sin registros ficticios)
   const [auditoriaSedes, setAuditoriaSedes] = useState([
     {
       id: 1,
@@ -65,56 +65,16 @@ export default function MisDeberes() {
       estado: "Entregado",
       fechaEntrega: "2026-10-21",
       soporteUrl: "https://edbbhvfdocttghcpvxhu.supabase.co/storage/v1/object/public/soportes-institucionales/ejemplo_balance_pereira.pdf"
-    },
-    {
-      id: 3,
-      sede: "Sede Local Cartago",
-      departamento: "Valle del Cauca",
-      pastor: "Andrés Ruiz",
-      telefono: "+57 311 234 5678",
-      informe: "Informe Financiero Mensual",
-      estado: "Pendiente",
-      fechaEntrega: null,
-      soporteUrl: null
-    },
-    {
-      id: 4,
-      sede: "Sede Central Armenia",
-      departamento: "Quindío",
-      pastor: "Manuel Ortiz",
-      telefono: "+57 314 876 5432",
-      informe: "Informe Financiero Mensual",
-      estado: "Entregado",
-      fechaEntrega: "2026-10-20",
-      soporteUrl: "https://edbbhvfdocttghcpvxhu.supabase.co/storage/v1/object/public/soportes-institucionales/ejemplo_balance_armenia.pdf"
-    },
-    {
-      id: 5,
-      sede: "Sede Manizales Norte",
-      departamento: "Caldas",
-      pastor: "David Echeverri",
-      telefono: "+57 320 654 9870",
-      informe: "Informe Financiero Mensual",
-      estado: "Entregado",
-      fechaEntrega: "2026-10-23",
-      soporteUrl: "https://edbbhvfdocttghcpvxhu.supabase.co/storage/v1/object/public/soportes-institucionales/ejemplo_balance_manizales.pdf"
-    },
-    {
-      id: 6,
-      sede: "Misión Quibdó",
-      departamento: "Chocó",
-      pastor: "Wilson Mosquera",
-      telefono: "+57 313 777 8899",
-      informe: "Informe Financiero Mensual",
-      estado: "Pendiente",
-      fechaEntrega: null,
-      soporteUrl: null
     }
   ]);
 
   useEffect(() => {
+    setVistaActiva(perfil?.esAdministradora ? 'auditoria' : 'mis-deberes');
+  }, [perfil?.esAdministradora]);
+
+  useEffect(() => {
     cargarDeberes();
-  }, [user]);
+  }, [user, perfil]);
 
   const cargarDeberes = async () => {
     try {
@@ -129,17 +89,35 @@ export default function MisDeberes() {
       if (errDeberes) throw errDeberes;
 
       let entregasMap = {};
-      if (user?.id) {
-        const { data: entregasData, error: errEntregas } = await supabase
-          .from('entregas_deberes')
-          .select('*')
-          .eq('usuario_id', user.id);
+      // Consultar entregas en Supabase (y cruzarlas tanto para el pastor actual como para la tabla de auditoría de Nancy)
+      const { data: todasEntregas } = await supabase
+        .from('entregas_deberes')
+        .select('*, perfiles(nombre_completo, telefono)');
 
-        if (!errEntregas && entregasData) {
-          entregasData.forEach(e => {
+      if (todasEntregas) {
+        todasEntregas.forEach(e => {
+          if (user?.id && e.usuario_id === user.id) {
             entregasMap[e.deber_id] = e;
+          }
+        });
+
+        // Actualizar tabla de auditoría zonal en tiempo real si algún pastor radicó soporte
+        setAuditoriaSedes(prev => prev.map(fila => {
+          const digitosFila = (fila.telefono || '').replace(/\D/g, '').slice(-10);
+          const entregaPastor = todasEntregas.find(e => {
+            const digitosEntrega = (e.perfiles?.telefono || '').replace(/\D/g, '').slice(-10);
+            return digitosEntrega && digitosEntrega === digitosFila && e.estado === 'completado';
           });
-        }
+          if (entregaPastor) {
+            return {
+              ...fila,
+              estado: 'Entregado',
+              fechaEntrega: entregaPastor.fecha_entrega ? entregaPastor.fecha_entrega.slice(0, 10) : new Date().toISOString().slice(0, 10),
+              soporteUrl: entregaPastor.archivo_url || fila.soporteUrl
+            };
+          }
+          return fila;
+        }));
       }
 
       const tareasFusionadas = (deberesData || []).map(d => {
@@ -247,6 +225,20 @@ export default function MisDeberes() {
           archivoUrl: publicUrl || "https://ejemplo-soporte-institucional.pdf",
           fechaEntrega: new Date().toISOString()
         } : t));
+
+        // Sincronizar de inmediato en la tabla de Auditoría Zonal para la sede del pastor actual
+        const telActual = (perfil?.telefono || '').replace(/\D/g, '').slice(-10);
+        setAuditoriaSedes(prev => prev.map(s => {
+          if ((s.telefono || '').replace(/\D/g, '').slice(-10) === telActual) {
+            return {
+              ...s,
+              estado: 'Entregado',
+              fechaEntrega: new Date().toISOString().slice(0, 10),
+              soporteUrl: publicUrl || "https://ejemplo-soporte-institucional.pdf"
+            };
+          }
+          return s;
+        }));
 
         alert(`¡Soporte "${archivo.name}" radicado con éxito ante la administración zonal de Nancy García!`);
       } catch (error) {
@@ -485,21 +477,26 @@ export default function MisDeberes() {
 
                       <td className="p-4 text-right pr-6">
                         {item.soporteUrl ? (
-                          <button
-                            onClick={() => alert(`Visualizando Informe Financiero radicado por la congregación de ${item.sede} ante la Administración Zonal.`)}
+                          <a
+                            href={item.soporteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-colors"
                           >
                             <FileText size={14} />
                             Ver Soporte PDF
-                          </button>
+                            <ExternalLink size={12} />
+                          </a>
                         ) : (
-                          <button
-                            onClick={() => alert(`Enviando recordatorio administrativo por WhatsApp al Pastor ${item.pastor} (${item.telefono}) de la sede ${item.sede}...`)}
+                          <a
+                            href={`https://wa.me/${item.telefono.replace(/\D/g, '')}?text=${encodeURIComponent(`Paz de Cristo Pastor ${item.pastor}. Le saluda Nancy García desde la Administración Zonal Sur-Occidente de la Misión Panamericana. Le recordamos amablemente radicar el soporte de: ${item.informe} correspondiente a la sede ${item.sede}.`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-lg text-xs font-semibold transition-colors"
                           >
                             <Send size={13} />
-                            Notificar WhatsApp
-                          </button>
+                            Recordar por WhatsApp
+                          </a>
                         )}
                       </td>
                     </tr>

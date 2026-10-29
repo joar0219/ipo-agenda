@@ -83,6 +83,16 @@ export default function Dashboard() {
       if (!confirmar) return;
     }
 
+    // Validación de dominio: un Pastor Local solo puede publicar en su agenda Personal o Eclesial Local
+    if (!perfil?.esDominioGlobal && (tipoAlcance === 'Nacional_IPO' || tipoAlcance === 'Zonal')) {
+      setMensajeForm({ tipo: 'error', texto: 'Solo el Dominio Global puede publicar eventos a nivel general IPO.' });
+      return;
+    }
+
+    const uuidValido = user?.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(user.id)
+      ? user.id
+      : null;
+
     try {
       const { error } = await supabase
         .from('agenda')
@@ -93,7 +103,8 @@ export default function Dashboard() {
             fecha_inicio: new Date(fechaInicio).toISOString(), 
             fecha_fin: new Date(fechaFin).toISOString(), 
             es_obligatorio: esObligatorio,
-            usuario_id: user?.id || null
+            usuario_id: uuidValido,
+            sede_id: perfil?.sede_id || null
           }
         ]);
 
@@ -134,6 +145,7 @@ export default function Dashboard() {
   const obtenerColorTipo = (tipo) => {
     switch(tipo) {
       case 'Nacional_IPO': return 'bg-red-500';
+      case 'Zonal': return 'bg-red-500';
       case 'Local': return 'bg-blue-500';
       case 'Personal': return 'bg-green-500';
       case 'Descanso': return 'bg-slate-400';
@@ -272,15 +284,20 @@ export default function Dashboard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Alcance institucional</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Alcance de la Agenda</label>
               <select 
                 value={tipoAlcance}
                 onChange={(e) => setTipoAlcance(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
-                <option value="Local">Local (Congregación)</option>
-                <option value="Nacional_IPO">Nacional (Directiva IPO)</option>
-                <option value="Personal">Personal Pastoral</option>
+                <option value="Personal">Personal (Privada del Pastor)</option>
+                <option value="Local">Eclesial (Comunidad / Iglesia Local)</option>
+                {perfil?.esDominioGlobal && (
+                  <>
+                    <option value="Zonal">Nivel IPO Zonal (Sur-Occidente)</option>
+                    <option value="Nacional_IPO">Nivel IPO Nacional (Misión Panamericana)</option>
+                  </>
+                )}
                 <option value="Descanso">Descanso Ministerial</option>
               </select>
             </div>

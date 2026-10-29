@@ -36,18 +36,31 @@ BEGIN
     END IF;
 END $$;
 
--- 3. TABLA DE PERFILES (SINCRONIZADA CON TODOS LOS ROLES INSTITUCIONALES)
+-- 3. TABLA DE PERFILES (SINCRONIZADA CON TODOS LOS ROLES INSTITUCIONALES Y PIN DE ACCESO)
 CREATE TABLE IF NOT EXISTS public.perfiles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nombre_completo TEXT NOT NULL,
     telefono TEXT UNIQUE NOT NULL,
     rol TEXT DEFAULT 'Pastor',
     sede_id UUID REFERENCES public.sedes(id) ON DELETE SET NULL,
+    pin_acceso TEXT DEFAULT '123456',
+    requiere_cambio_pin BOOLEAN DEFAULT TRUE,
     activo BOOLEAN DEFAULT TRUE,
     notas TEXT,
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Si la tabla perfiles ya existía, asegurar las columnas de PIN personal
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='perfiles' AND column_name='pin_acceso') THEN
+        ALTER TABLE public.perfiles ADD COLUMN pin_acceso TEXT DEFAULT '123456';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='perfiles' AND column_name='requiere_cambio_pin') THEN
+        ALTER TABLE public.perfiles ADD COLUMN requiere_cambio_pin BOOLEAN DEFAULT TRUE;
+    END IF;
+END $$;
 
 -- Actualizar restricción CHECK para admitir tanto nombres amigables como códigos técnicos
 ALTER TABLE public.perfiles DROP CONSTRAINT IF EXISTS perfiles_rol_check;
@@ -64,7 +77,7 @@ CREATE TABLE IF NOT EXISTS public.agenda (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     titulo TEXT NOT NULL,
     descripcion TEXT,
-    tipo_alcance TEXT DEFAULT 'Local' CHECK (tipo_alcance IN ('Nacional_IPO', 'Local', 'Personal', 'Descanso')),
+    tipo_alcance TEXT DEFAULT 'Local' CHECK (tipo_alcance IN ('Nacional_IPO', 'Zonal', 'Local', 'Personal', 'Descanso')),
     fecha_inicio TIMESTAMPTZ NOT NULL,
     fecha_fin TIMESTAMPTZ NOT NULL,
     es_obligatorio BOOLEAN DEFAULT FALSE,
@@ -72,6 +85,10 @@ CREATE TABLE IF NOT EXISTS public.agenda (
     usuario_id UUID REFERENCES public.perfiles(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+ALTER TABLE public.agenda DROP CONSTRAINT IF EXISTS agenda_tipo_alcance_check;
+ALTER TABLE public.agenda ADD CONSTRAINT agenda_tipo_alcance_check
+    CHECK (tipo_alcance IN ('Nacional_IPO', 'Zonal', 'Local', 'Personal', 'Descanso'));
 
 -- 5. TABLA DE DEBERES INSTITUCIONALES (SUPERVISADOS POR NANCY GARCÍA)
 CREATE TABLE IF NOT EXISTS public.deberes (
@@ -149,35 +166,49 @@ DROP POLICY IF EXISTS "Actualizacion de soportes institucionales" ON storage.obj
 CREATE POLICY "Actualizacion de soportes institucionales" ON storage.objects 
 FOR UPDATE USING (bucket_id = 'soportes-institucionales');
 
--- 9. DATOS SEMILLA: ESTRUCTURA TERRITORIAL DE LA MISIÓN PANAMERICANA (SUR-OCCIDENTE)
+-- 9. DATOS SEMILLA REALES: ESTRUCTURA OFICIAL DE LA MISIÓN PANAMERICANA (SIN REGISTROS FICTICIOS)
+-- Eliminar registros ficticios de demostraciones previas si existían en la base de datos
+DELETE FROM public.perfiles WHERE nombre_completo IN (
+    'Wilson Mosquera Palacios',
+    'Wilson Mosquera',
+    'Carlos Arturo Ramírez',
+    'Fernando Morales Echeverry',
+    'Héctor Fabio Caicedo',
+    'Andrés Ruiz',
+    'Manuel Ortiz',
+    'David Echeverri',
+    'Pastor Daniel Estudiante',
+    'Pastor Carlos Gómez'
+);
+
+DELETE FROM public.sedes WHERE nombre IN (
+    'Iglesia Panamericana Central Quibdó',
+    'Iglesia Panamericana Armenia Centro',
+    'Iglesia Panamericana Manizales',
+    'Iglesia Panamericana Cartago'
+);
+
 INSERT INTO public.sedes (nombre, ciudad, departamento, zona, direccion, telefono_contacto, tipo)
 VALUES 
     ('Sede Central Roldanillo', 'Roldanillo', 'Valle del Cauca', 'Zona Sur-Occidente', 'Carrera 7 # 8-45, Barrio El Carmen', '+57 315 123 4567', 'Local'),
     ('Presbiterio Central Pereira', 'Pereira', 'Risaralda', 'Zona Sur-Occidente', 'Av. 30 de Agosto # 42-18, Sector Maraya', '+57 318 987 6543', 'Presbiterio_Zonal'),
-    ('Iglesia Panamericana Central Quibdó', 'Quibdó', 'Chocó', 'Zona Sur-Occidente', 'Calle 26 # 4-50, Barrio Alameda', '+57 311 555 4321', 'Local'),
-    ('Iglesia Panamericana Armenia Centro', 'Armenia', 'Quindío', 'Zona Sur-Occidente', 'Carrera 14 # 21-30, Barrio Galán', '+57 316 789 0123', 'Local'),
-    ('Iglesia Panamericana Manizales', 'Manizales', 'Caldas', 'Zona Sur-Occidente', 'Calle 22 # 24-12, Sector Centro Histórico', '+57 317 444 9876', 'Local'),
-    ('Iglesia Panamericana Cartago', 'Cartago', 'Valle del Cauca', 'Zona Sur-Occidente', 'Carrera 4 # 11-20, Barrio El Carmen', '+57 313 888 2345', 'Local'),
     ('Administración Zonal Sur-Occidente', 'Pereira', 'Risaralda', 'Zona Sur-Occidente', 'Av. Circunvalar # 12-40 Oficina 302', '+57 312 456 7890', 'Presbiterio_Zonal'),
     ('Sede Nacional Misión Panamericana', 'Bogotá D.C.', 'Cundinamarca', 'Nacional', 'Carrera 13 # 63-39 Chapinero', '+57 300 111 2233', 'Sede_Nacional')
 ON CONFLICT DO NOTHING;
 
--- Personal Clave Registrado
-INSERT INTO public.perfiles (nombre_completo, telefono, rol, activo, notas)
+-- Personal Oficial Registrado (con PIN personal asignado)
+INSERT INTO public.perfiles (nombre_completo, telefono, rol, pin_acceso, requiere_cambio_pin, activo, notas)
 VALUES 
-    ('Nancy García', '+57 312 456 7890', 'Administracion', true, 'Encargada de Administración Zonal y Contabilidad (Sur-Occidente)'),
-    ('Dra. Elizabeth Nieto', '+57 310 999 8888', 'Abogado', true, 'Dirección de Asesoría Jurídica y Notarial'),
-    ('Gabriel González', '+57 318 987 6543', 'Presbitero', true, 'Presbítero Principal y Miembro de Junta Directiva'),
-    ('José Orlando Arcila', '+57 315 123 4567', 'Pastor', true, 'Pastor Local Sede Central Roldanillo'),
-    ('Wilson Mosquera Palacios', '+57 311 555 4321', 'Pastor', true, 'Pastor Local Iglesia Panamericana Central Quibdó'),
-    ('Carlos Arturo Ramírez', '+57 316 789 0123', 'Pastor', true, 'Pastor Local Iglesia Panamericana Armenia Centro'),
-    ('Fernando Morales Echeverry', '+57 317 444 9876', 'Pastor', true, 'Pastor Local Iglesia Panamericana Manizales'),
-    ('Héctor Fabio Caicedo', '+57 313 888 2345', 'Pastor', true, 'Pastor Local Iglesia Panamericana Cartago'),
-    ('Armando Arboleda', '+57 300 111 2233', 'Presidente Nacional', true, 'Presidente General Misión Panamericana de Colombia')
+    ('José Orlando Arcila', '+57 315 123 4567', 'Pastor', '234567', false, true, 'Pastor Titular Sede Central Roldanillo · Desarrollador y Administrador General del Sistema'),
+    ('Nancy García', '+57 312 456 7890', 'Administracion', '456789', false, true, 'Encargada de Administración Zonal y Contabilidad (Dominio Global)'),
+    ('Gabriel González', '+57 318 987 6543', 'Presbitero', '876543', false, true, 'Presbítero Principal y Miembro de Junta Directiva (Dominio Global)'),
+    ('Dra. Elizabeth Nieto', '+57 310 999 8888', 'Abogado', '998888', false, true, 'Dirección de Asesoría Jurídica y Notarial (Dominio Global)'),
+    ('Armando Arboleda', '+57 300 111 2233', 'Presidente Nacional', '112233', false, true, 'Presidente General Misión Panamericana de Colombia (Dominio Global)')
 ON CONFLICT (telefono) DO UPDATE SET 
     nombre_completo = EXCLUDED.nombre_completo,
     rol = EXCLUDED.rol,
-    activo = EXCLUDED.activo;
+    activo = EXCLUDED.activo,
+    notas = EXCLUDED.notas;
 
 -- Deberes Institucionales emitidos por la Administración Zonal
 INSERT INTO public.deberes (titulo, descripcion, asignado_por, rol_destino, fecha_limite, prioridad, requiere_adjunto)

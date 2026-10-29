@@ -1,18 +1,27 @@
 import { useState } from 'react';
-import { UserCircle, User, Settings, LogOut, Menu, Bell, FileText, AlertCircle, Users, ChevronDown } from 'lucide-react';
+import { User, Settings, LogOut, Menu, Bell, FileText, AlertCircle, Users, ChevronDown, ShieldCheck, Eye } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Header({ usuarioActual, setSidebarAbierto }) {
   const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
   const [notificacionesAbiertas, setNotificacionesAbiertas] = useState(false);
-  const { logout, perfilSimuladoId, cambiarPerfilSimulado, perfilesDisponibles } = useAuth();
+  const {
+    logout,
+    perfil,
+    perfilSimuladoId,
+    cambiarPerfilSimulado,
+    perfilesDisponibles,
+    modoPresentacion,
+    alternarModoPresentacion,
+    alternarVistaPastorDesarrollador
+  } = useAuth();
 
   const notificaciones = [
     {
       id: 1,
       tipo: 'urgente',
-      titulo: 'Informe Financiero Zonal (Sur-Occidente)',
-      texto: 'Vence en 2 días. 10 de 12 sedes ya han radicado soporte.',
+      titulo: 'Agenda y Deberes Institucionales (Sur-Occidente)',
+      texto: 'Recuerda verificar los compromisos eclesiales y soportes mensuales de tu sede.',
       icono: FileText,
       colorIcono: 'text-rose-600',
       bgIcono: 'bg-rose-100',
@@ -22,7 +31,7 @@ export default function Header({ usuarioActual, setSidebarAbierto }) {
       id: 2,
       tipo: 'advertencia',
       titulo: 'Descanso Pastoral (Lunes)',
-      texto: 'El sistema bloquea automáticamente eventos oficiales los lunes.',
+      texto: 'El sistema protege el día lunes para descanso ministerial y familiar.',
       icono: AlertCircle,
       colorIcono: 'text-amber-600',
       bgIcono: 'bg-amber-100',
@@ -31,8 +40,8 @@ export default function Header({ usuarioActual, setSidebarAbierto }) {
     {
       id: 3,
       tipo: 'info',
-      titulo: 'Junta Directiva Nacional',
-      texto: 'Presbítero Gabriel González y Presidente Armando Arboleda han coordinado agenda.',
+      titulo: 'Coordinación Directiva IPO',
+      texto: 'Presbítero Gabriel González, Nancy García y Presidencia Nacional conectados en agenda.',
       icono: User,
       colorIcono: 'text-blue-600',
       bgIcono: 'bg-blue-100',
@@ -44,12 +53,24 @@ export default function Header({ usuarioActual, setSidebarAbierto }) {
 
   const irAPerfil = () => {
     setMenuPerfilAbierto(false);
-    alert(`Expediente Institucional - Misión Panamericana de Colombia\n\nNombre: ${usuarioActual.nombre}\nRol: ${usuarioActual.rol}\nJurisdicción: ${usuarioActual.zona}\nSede: ${usuarioActual.direccion}\nUbicación: ${usuarioActual.lugar}`);
+    alert(
+      `Expediente Institucional - Misión Panamericana de Colombia\n\n` +
+      `Nombre: ${usuarioActual.nombre}\n` +
+      `Rol: ${usuarioActual.rol}\n` +
+      `Dominio: ${perfil?.esDominioGlobal ? 'Dominio Global (Directivo / Administración)' : 'Dominio Local (Pastoral y Comunidad)'}\n` +
+      `Sede: ${usuarioActual.direccion}\n` +
+      `Ubicación: ${usuarioActual.lugar}`
+    );
   };
 
   const irAConfiguracion = () => {
     setMenuPerfilAbierto(false);
-    alert("Preferencias del Sistema:\n• Organización: Misión Panamericana de Colombia\n• Zona Territorial: Sur-Occidente\n• Sede Principal Zonal: Pereira, Risaralda");
+    alert(
+      "Preferencias del Sistema:\n" +
+      "• Organización: Misión Panamericana de Colombia (IPO)\n" +
+      "• Zona Territorial: Sur-Occidente\n" +
+      "• Alcances de Agenda: Personal, Eclesial (Comunidad) e Institucional IPO"
+    );
   };
 
   const cerrarSesion = async () => {
@@ -62,10 +83,9 @@ export default function Header({ usuarioActual, setSidebarAbierto }) {
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shadow-sm z-20 shrink-0">
-      
-      {/* Grupo izquierdo: Botón móvil + Título + Selector de Pruebas Zonal */}
+      {/* Grupo izquierdo: Botón móvil + Título + Conmutador SuperAdmin / Sustentación */}
       <div className="flex items-center gap-3">
-        <button 
+        <button
           onClick={() => setSidebarAbierto(true)}
           className="md:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
         >
@@ -73,20 +93,48 @@ export default function Header({ usuarioActual, setSidebarAbierto }) {
         </button>
 
         <div>
-          <h2 className="text-lg font-bold text-slate-800 hidden sm:block">Panel de Gobernanza</h2>
-          <span className="text-[11px] text-slate-400 hidden sm:block font-medium">Zona Sur-Occidente</span>
+          <h2 className="text-lg font-bold text-slate-800 hidden sm:block">Agenda y Directorio IPO</h2>
+          <span className="text-[11px] text-slate-400 hidden sm:block font-medium">
+            {perfil?.esDominioGlobal ? 'Dominio Global Institucional' : 'Dominio Pastoral Local'}
+          </span>
           <h2 className="text-xl font-bold text-blue-600 sm:hidden">IPO</h2>
         </div>
 
-        {/* SELECTOR RÁPIDO DE ROLES PARA TIEMPO DE PRUEBA Y DEMOSTRACIÓN */}
-        {perfilesDisponibles && perfilesDisponibles.length > 0 && (
-          <div className="hidden xl:flex items-center gap-2 bg-slate-100 border border-slate-200/90 px-3 py-1.5 rounded-xl text-xs ml-4">
-            <Users size={14} className="text-blue-600 shrink-0" />
-            <span className="text-slate-500 font-semibold">Simular Rol:</span>
+        {/* BOTÓN EXCLUSIVO PARA EL DESARROLLADOR Y PASTOR (Alternar entre Dominio Global y Vista de Pastor Local) */}
+        {perfil?.esSuperAdmin && (
+          <button
+            type="button"
+            onClick={alternarVistaPastorDesarrollador}
+            className={`hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ml-2 ${
+              perfil?.modoVistaLocal
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                : 'bg-slate-900 text-white border-slate-800 hover:bg-slate-800'
+            }`}
+            title="Como Desarrollador y Pastor puedes alternar entre tu Dominio Global de Administrador y la vista de Pastor Local"
+          >
+            {perfil?.modoVistaLocal ? (
+              <>
+                <Eye size={14} className="text-emerald-600" />
+                <span>Vista actual: Pastor Local (Cambiar a Dominio Global)</span>
+              </>
+            ) : (
+              <>
+                <ShieldCheck size={14} className="text-emerald-400" />
+                <span>Dominio Global Activo (Probar vista Pastor Local)</span>
+              </>
+            )}
+          </button>
+        )}
+
+        {/* SELECTOR RÁPIDO DE ROLES (VISIBLE SOLO EN MODO SUSTENTACIÓN DIRECTIVA) */}
+        {modoPresentacion && perfilesDisponibles && perfilesDisponibles.length > 0 && (
+          <div className="hidden xl:flex items-center gap-2 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl text-xs ml-2">
+            <Users size={14} className="text-amber-700 shrink-0" />
+            <span className="text-amber-800 font-semibold">Vista Directiva:</span>
             <select
               value={perfilSimuladoId}
               onChange={(e) => cambiarPerfilSimulado(e.target.value)}
-              className="bg-transparent font-bold text-slate-800 outline-none cursor-pointer text-xs"
+              className="bg-transparent font-bold text-slate-900 outline-none cursor-pointer text-xs"
             >
               {perfilesDisponibles.map(p => (
                 <option key={p.id} value={p.id}>
@@ -97,13 +145,12 @@ export default function Header({ usuarioActual, setSidebarAbierto }) {
           </div>
         )}
       </div>
-      
+
       {/* Grupo derecho: Notificaciones y Perfil */}
       <div className="flex items-center gap-2 sm:gap-4">
-        
         {/* CAMPANA DE NOTIFICACIONES */}
         <div className="relative">
-          <button 
+          <button
             onClick={() => {
               setNotificacionesAbiertas(!notificacionesAbiertas);
               setMenuPerfilAbierto(false);
@@ -118,14 +165,13 @@ export default function Header({ usuarioActual, setSidebarAbierto }) {
             )}
           </button>
 
-          {/* Menú desplegable de Notificaciones */}
           {notificacionesAbiertas && (
             <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
                 <h3 className="font-semibold text-slate-800">Notificaciones Institucionales</h3>
                 <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">Zona Sur-Occidente</span>
               </div>
-              
+
               <div className="max-h-[300px] overflow-y-auto">
                 {notificaciones.map((notif) => (
                   <div key={notif.id} className={`flex items-start gap-3 p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer ${!notif.leido ? 'bg-blue-50/30' : ''}`}>
@@ -150,12 +196,11 @@ export default function Header({ usuarioActual, setSidebarAbierto }) {
           )}
         </div>
 
-        {/* LÍNEA DIVISORIA */}
         <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
 
         {/* PERFIL DE USUARIO */}
         <div className="relative">
-          <div 
+          <div
             onClick={() => {
               setMenuPerfilAbierto(!menuPerfilAbierto);
               setNotificacionesAbiertas(false);
@@ -165,7 +210,11 @@ export default function Header({ usuarioActual, setSidebarAbierto }) {
             <div className="text-right hidden sm:block">
               <p className="text-sm font-bold text-slate-800 leading-tight">{usuarioActual.nombre}</p>
               <div className="flex items-center justify-end gap-1 mt-0.5">
-                <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200/60">
+                <span className={`text-[11px] font-semibold px-1.5 py-0.2 rounded border ${
+                  perfil?.esDominioGlobal
+                    ? 'text-blue-700 bg-blue-50 border-blue-200'
+                    : 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                }`}>
                   {usuarioActual.rol}
                 </span>
                 <span className="text-xs text-slate-400">· {usuarioActual.lugar}</span>
@@ -177,33 +226,64 @@ export default function Header({ usuarioActual, setSidebarAbierto }) {
             <ChevronDown size={14} className="text-slate-400 hidden sm:block" />
           </div>
 
-          {/* Menú desplegable del Perfil */}
           {menuPerfilAbierto && (
             <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="p-3 bg-slate-50 border-b border-slate-100">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Identidad Activa</p>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  {perfil?.esDominioGlobal ? 'Dominio Global IPO' : 'Dominio Pastoral Local'}
+                </p>
                 <p className="text-sm font-bold text-slate-800 mt-1">{usuarioActual.nombre}</p>
                 <p className="text-xs text-blue-600 font-medium">{usuarioActual.rol}</p>
                 <p className="text-[11px] text-slate-500 mt-0.5">{usuarioActual.direccion}</p>
               </div>
 
               <div className="p-2">
-                <div 
+                {perfil?.esSuperAdmin && (
+                  <div
+                    className="flex items-center justify-between p-2 hover:bg-emerald-50 rounded-lg cursor-pointer text-xs text-slate-700 transition-colors"
+                    onClick={() => {
+                      alternarVistaPastorDesarrollador();
+                      setMenuPerfilAbierto(false);
+                    }}
+                  >
+                    <span className="flex items-center gap-2 font-semibold">
+                      <ShieldCheck size={15} className="text-emerald-600" />
+                      <span>Alternar Dominio Global/Local</span>
+                    </span>
+                  </div>
+                )}
+
+                <div
                   className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded-lg cursor-pointer text-sm text-slate-700 transition-colors"
                   onClick={irAPerfil}
                 >
                   <User size={16} />
                   <span>Expediente Institucional</span>
                 </div>
-                <div 
+                <div
                   className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded-lg cursor-pointer text-sm text-slate-700 transition-colors"
                   onClick={irAConfiguracion}
                 >
                   <Settings size={16} />
                   <span>Jurisdicción y Sedes</span>
                 </div>
+                <div
+                  className="flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg cursor-pointer text-xs text-slate-600 transition-colors"
+                  onClick={() => {
+                    alternarModoPresentacion(!modoPresentacion);
+                    setMenuPerfilAbierto(false);
+                  }}
+                >
+                  <span className="flex items-center gap-2">
+                    <Users size={15} className="text-amber-600" />
+                    <span>Modo Sustentación</span>
+                  </span>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${modoPresentacion ? 'bg-amber-200 text-amber-900' : 'bg-slate-100 text-slate-500'}`}>
+                    {modoPresentacion ? 'ACTIVO' : 'OFF'}
+                  </span>
+                </div>
                 <div className="border-t border-slate-100 my-1"></div>
-                <div 
+                <div
                   onClick={cerrarSesion}
                   className="flex items-center gap-2 p-2 hover:bg-red-50 text-red-600 rounded-lg cursor-pointer text-sm font-medium transition-colors"
                 >
@@ -214,7 +294,6 @@ export default function Header({ usuarioActual, setSidebarAbierto }) {
             </div>
           )}
         </div>
-        
       </div>
     </header>
   );
