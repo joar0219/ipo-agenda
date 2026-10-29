@@ -183,6 +183,7 @@ export default function RegistroPastor() {
   const [editDireccion, setEditDireccion] = useState('');
   const [editActivo, setEditActivo] = useState(true);
   const [guardandoEdicion, setGuardandoEdicion] = useState(false);
+  const [editHorarios, setEditHorarios] = useState([]);
 
   useEffect(() => {
     cargarDirectorio();
@@ -208,6 +209,13 @@ export default function RegistroPastor() {
   const cargarDirectorio = async () => {
     try {
       setCargando(true);
+      const guardadoLocal = localStorage.getItem('ipo_directorio_sedes_v2');
+      let baseInicial = DIRECTORIO_INICIAL;
+      if (guardadoLocal) {
+        try {
+          baseInicial = JSON.parse(guardadoLocal);
+        } catch (e) {}
+      }
       const { data, error } = await supabase
         .from('perfiles')
         .select(`
@@ -242,14 +250,14 @@ export default function RegistroPastor() {
           });
           setUsuarios(datosCompletos);
         } else {
-          setUsuarios(DIRECTORIO_INICIAL);
+          setUsuarios(baseInicial);
         }
       } else {
-        setUsuarios(DIRECTORIO_INICIAL);
+        setUsuarios(baseInicial);
       }
     } catch (error) {
       console.warn('Usando directorio oficial predeterminado:', error);
-      setUsuarios(DIRECTORIO_INICIAL);
+      setUsuarios(baseInicial);
     } finally {
       setCargando(false);
     }
@@ -288,6 +296,36 @@ export default function RegistroPastor() {
     setEditRol(u.rol);
     setEditDireccion(u.sedes?.direccion || '');
     setEditActivo(u.activo);
+    const horariosActuales = (u.sedes?.horarios && u.sedes.horarios.length > 0)
+      ? JSON.parse(JSON.stringify(u.sedes.horarios))
+      : [
+          { dia: 'Domingo', hora: '09:00 AM - 10:30 AM', culto: 'Escuela Dominical y Discipulado', tipo: 'Culto Principal' },
+          { dia: 'Domingo', hora: '06:00 PM - 08:00 PM', culto: 'Culto General de Alabanza y Palabra', tipo: 'Culto Principal' },
+          { dia: 'Miércoles', hora: '07:00 PM - 08:30 PM', culto: 'Culto de Doctrina y Estudio Bíblico', tipo: 'Enseñanza' },
+          { dia: 'Viernes', hora: '09:00 AM - 11:30 AM', culto: 'Ayuno Congregacional y Clamor', tipo: 'Oración' },
+          { dia: 'Sábado', hora: '06:30 PM - 08:00 PM', culto: 'Reunión de Jóvenes y Familias', tipo: 'Ministerios' },
+          { dia: 'Lunes', hora: 'Todo el día', culto: 'Descanso Ministerial Pastoral (Institucional IPO)', tipo: 'Descanso' }
+        ];
+    setEditHorarios(horariosActuales);
+  };
+
+  const actualizarHorario = (index, campo, valor) => {
+    setEditHorarios(prev => {
+      const copia = [...prev];
+      copia[index] = { ...copia[index], [campo]: valor };
+      return copia;
+    });
+  };
+
+  const agregarCulto = () => {
+    setEditHorarios(prev => [
+      ...prev,
+      { dia: 'Jueves', hora: '07:00 PM - 08:30 PM', culto: 'Servicio de Oración y Familias', tipo: 'Oración' }
+    ]);
+  };
+
+  const eliminarCulto = (index) => {
+    setEditHorarios(prev => prev.filter((_, i) => i !== index));
   };
 
   const guardarEdicion = async (e) => {
@@ -322,22 +360,45 @@ export default function RegistroPastor() {
           .eq('id', usuarioEditando.id);
       }
 
-      setUsuarios(prev => prev.map(u => {
-        if (u.id === usuarioEditando.id) {
-          return {
-            ...u,
-            nombre_completo: editNombre,
-            telefono: numNormalizado,
-            rol: editRol,
-            activo: editActivo,
-            sedes: {
-              ...(u.sedes || {}),
-              direccion: editDireccion || u.sedes?.direccion
-            }
-          };
+      setUsuarios(prev => {
+        const actualizados = prev.map(u => {
+          if (u.id === usuarioEditando.id) {
+            return {
+              ...u,
+              nombre_completo: editNombre,
+              telefono: numNormalizado,
+              rol: editRol,
+              activo: editActivo,
+              sedes: {
+                ...(u.sedes || {}),
+                direccion: editDireccion || u.sedes?.direccion,
+                horarios: editHorarios
+              }
+            };
+          }
+          return u;
+        });
+        try {
+          localStorage.setItem('ipo_directorio_sedes_v2', JSON.stringify(actualizados));
+        } catch (e) {
+          console.warn('Error guardando en almacenamiento local:', e);
         }
-        return u;
-      }));
+        return actualizados;
+      });
+
+      if (pastorFicha && pastorFicha.id === usuarioEditando.id) {
+        setPastorFicha(prev => ({
+          ...prev,
+          nombre_completo: editNombre,
+          telefono: numNormalizado,
+          rol: editRol,
+          sedes: {
+            ...(prev.sedes || {}),
+            direccion: editDireccion || prev.sedes?.direccion,
+            horarios: editHorarios
+          }
+        }));
+      }
 
       const msgPin = (pinLimpio && pinLimpio.length === 6)
         ? `\nPIN actualizado a: ${pinLimpio}${pinLimpio === '123456' ? ' (se le pedirá crear uno personal en su próximo ingreso)' : ''}`
@@ -1000,7 +1061,18 @@ export default function RegistroPastor() {
                     <Calendar size={14} className="text-blue-600" />
                     Reuniones Semanales y Cultos de la Congregación
                   </h4>
-                  <span className="text-[11px] text-slate-500 font-medium">Cronograma Zonal</span>
+                  <button
+                    onClick={() => {
+                      const usuarioParaEditar = pastorFicha;
+                      setPastorFicha(null);
+                      abrirEdicion(usuarioParaEditar);
+                    }}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-lg border border-blue-200 transition-colors cursor-pointer"
+                    title="Modificar los días y horarios de reunión"
+                  >
+                    <Edit2 size={12} />
+                    <span>Modificar Horarios</span>
+                  </button>
                 </div>
 
                 <div className="space-y-2">
@@ -1086,21 +1158,21 @@ export default function RegistroPastor() {
       ========================================================================= */}
       {usuarioEditando && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-slate-950 p-6 flex justify-between items-center text-white border-b border-slate-800">
+          <div className="bg-white rounded-3xl max-w-xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-slate-950 p-5 sm:p-6 flex justify-between items-center text-white border-b border-slate-800 shrink-0">
               <div>
                 <h4 className="font-bold text-lg">Actualizar Datos de Pastor y Congregación</h4>
-                <p className="text-xs text-blue-300">Gestión de cambio de línea telefónica, traslados o dirección física</p>
+                <p className="text-xs text-blue-300">Línea telefónica, dirección física y días de reuniones/cultos</p>
               </div>
               <button 
                 onClick={() => setUsuarioEditando(null)} 
-                className="text-slate-400 hover:text-white p-1 rounded-lg"
+                className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer"
               >
                 <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={guardarEdicion} className="p-6 space-y-4">
+            <form onSubmit={guardarEdicion} className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
               <div>
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre Completo del Pastor</label>
                 <input 
@@ -1140,6 +1212,103 @@ export default function RegistroPastor() {
                   placeholder="Ej. Carrera 7 # 8-45 Barrio El Carmen"
                   className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm font-medium"
                 />
+              </div>
+
+              {/* DÍAS Y HORARIOS DE CULTOS / REUNIONES DE LA CONGREGACIÓN */}
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-800 uppercase flex items-center gap-1.5">
+                    <Calendar size={15} className="text-blue-600" />
+                    Días y Horarios de Reuniones (Cultos)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={agregarCulto}
+                    className="text-[11px] font-bold bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <Plus size={12} /> Agregar Servicio
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-500 leading-tight">
+                  Configura los días, horas y tipos de servicio que celebra tu congregación local.
+                </p>
+
+                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                  {editHorarios.map((h, idx) => (
+                    <div key={idx} className="p-3 bg-white border border-slate-200 rounded-xl space-y-2 shadow-2xs">
+                      <div className="grid grid-cols-12 gap-2 items-center">
+                        <div className="col-span-4">
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase">Día</label>
+                          <select
+                            value={h.dia}
+                            onChange={(e) => actualizarHorario(idx, 'dia', e.target.value)}
+                            className="w-full text-xs font-bold p-1.5 border border-slate-200 rounded-lg bg-slate-50 focus:ring-1 focus:ring-blue-500"
+                          >
+                            <option value="Domingo">Domingo</option>
+                            <option value="Lunes">Lunes</option>
+                            <option value="Martes">Martes</option>
+                            <option value="Miércoles">Miércoles</option>
+                            <option value="Jueves">Jueves</option>
+                            <option value="Viernes">Viernes</option>
+                            <option value="Sábado">Sábado</option>
+                          </select>
+                        </div>
+                        <div className="col-span-7">
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase">Horario</label>
+                          <input
+                            type="text"
+                            value={h.hora}
+                            onChange={(e) => actualizarHorario(idx, 'hora', e.target.value)}
+                            placeholder="Ej. 07:00 PM - 08:30 PM"
+                            className="w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 font-semibold"
+                          />
+                        </div>
+                        <div className="col-span-1 text-right pt-4">
+                          {h.tipo !== 'Descanso' ? (
+                            <button
+                              type="button"
+                              onClick={() => eliminarCulto(idx)}
+                              className="text-slate-400 hover:text-rose-600 p-1 rounded transition-colors cursor-pointer"
+                              title="Eliminar este servicio"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          ) : (
+                            <span className="text-[10px] text-amber-500 font-bold" title="Día estatutario de descanso">★</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-12 gap-2 items-center">
+                        <div className="col-span-8">
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase">Nombre del Culto</label>
+                          <input
+                            type="text"
+                            value={h.culto}
+                            onChange={(e) => actualizarHorario(idx, 'culto', e.target.value)}
+                            placeholder="Ej. Escuela Dominical, Ayuno, Doctrina"
+                            className="w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 font-medium"
+                          />
+                        </div>
+                        <div className="col-span-4">
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase">Tipo</label>
+                          <select
+                            value={h.tipo}
+                            onChange={(e) => actualizarHorario(idx, 'tipo', e.target.value)}
+                            className="w-full text-[11px] font-semibold p-1.5 border border-slate-200 rounded-lg bg-slate-50 focus:ring-1 focus:ring-blue-500"
+                          >
+                            <option value="Culto Principal">Culto Principal</option>
+                            <option value="Enseñanza">Enseñanza</option>
+                            <option value="Oración">Oración</option>
+                            <option value="Ministerios">Ministerios</option>
+                            <option value="Administración">Administración</option>
+                            <option value="Descanso">Descanso</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* RESTABLECIMIENTO DE PIN DE SEGURIDAD */}
